@@ -29,7 +29,7 @@ function GuruDashboard({ user, onLogout }) {
       <header className="bg-blue-600 text-white p-4 shadow-lg">
         <div className="max-w-4xl mx-auto flex justify-between items-center">
           <div>
-            <h1 className="text-xl font-bold">Geo-Presensi GQ</h1>
+            <h1 className="text-xl font-bold">Presensi RQ Kamila</h1>
             <p className="text-sm text-blue-100">{user.nama}</p>
           </div>
           <button

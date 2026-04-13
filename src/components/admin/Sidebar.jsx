@@ -36,7 +36,7 @@ function Sidebar({ user, onLogout, isOpen, setIsOpen }) {
         {/* Header - Fixed */}
         <div className="flex-shrink-0 p-6 border-b border-blue-800 bg-blue-900">
           <div className="flex items-center justify-between">
-            <h2 className="text-xl font-bold">Geo-Presensi GQ</h2>
+            <h2 className="text-xl font-bold">Presensi RQ Kamila</h2>
             <button
               onClick={() => setIsOpen(false)}
               className="lg:hidden text-white hover:text-gray-300"

@@ -1,7 +1,7 @@
 {
-  "name": "Geo-Presensi GQ",
-  "short_name": "GeoGQ",
-  "description": "Sistem Presensi Guru Berbasis Geolocation & QR Code",
+  "name": "Presensi RQ Kamila",
+  "short_name": "PresensiRQ",
+  "description": "Sistem Presensi Geolocation & QR Code RQ Kamila",
   "start_url": "/",
   "display": "standalone",
   "background_color": "#ffffff",
