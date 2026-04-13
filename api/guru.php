@@ -119,6 +119,7 @@ if ($method === 'POST') {
         ]);
         
         sendResponse(true, 'Guru berhasil ditambahkan', ['id' => $pdo->lastInsertId()]);
+        logActivity($_SESSION['nama'] ?? 'Admin', 'Tambah Guru', 'Berhasil: ' . $data['nama']);
     } catch (PDOException $e) {
         // Handle duplicate entry error
         if ($e->getCode() == 23000) {
@@ -213,6 +214,7 @@ if ($method === 'PUT') {
         
         if ($result) {
             sendResponse(true, 'Guru berhasil diupdate');
+            logActivity($_SESSION['nama'] ?? 'Admin', 'Update Guru', 'Berhasil: ' . $data['nama']);
         } else {
             sendResponse(false, 'Gagal update data guru');
         }
@@ -240,6 +242,7 @@ if ($method === 'DELETE') {
         $stmt->execute([$id]);
         
         sendResponse(true, 'Guru berhasil dihapus');
+        logActivity($_SESSION['nama'] ?? 'Admin', 'Hapus Guru', 'Berhasil ID: ' . $id);
     } catch (PDOException $e) {
         sendResponse(false, 'Error: ' . $e->getMessage());
     }
