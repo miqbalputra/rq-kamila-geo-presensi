@@ -63,10 +63,25 @@ function LeaderboardGuru() {
         // Persentase tepat waktu dari total hari hadir
         const persentaseTepatWaktu = totalHadir > 0 ? (tepatWaktu / totalHadir) * 100 : 0
         
-        // SKOR BARU: Prioritas untuk yang selalu hadir DAN tepat waktu
-        // - Kehadiran 70% (harus hadir setiap hari)
-        // - Tepat waktu 30% (dari hari hadir, harus tepat waktu)
-        const skor = (persentaseKehadiran * 0.7) + (persentaseTepatWaktu * 0.3)
+        // Jam Kerja (Menghitung total menit kerja)
+        const totalMenit = guruPresensi.reduce((acc, p) => {
+          if (p.jam_masuk && p.jam_pulang) {
+            const [h1, m1] = p.jam_masuk.split(':').map(Number);
+            const [h2, m2] = p.jam_pulang.split(':').map(Number);
+            return acc + ((h2 * 60 + m2) - (h1 * 60 + m1));
+          }
+          return acc;
+        }, 0);
+
+        // Rata-rata jam kerja per hari hadir (asumsi target 8 jam = 480 menit)
+        const targetMenitHarian = 480; 
+        const persentaseDurasi = totalHadir > 0 ? Math.min((totalMenit / (totalHadir * targetMenitHarian)) * 100, 110) : 0; // Max 110% jika lembur
+
+        // SKOR FINAL: 
+        // - Kehadiran 50%
+        // - Tepat waktu 30%
+        // - Durasi Kerja 20%
+        const skor = (persentaseKehadiran * 0.5) + (persentaseTepatWaktu * 0.3) + (persentaseDurasi * 0.2)
 
         return {
           id: guru.id,
@@ -79,9 +94,11 @@ function LeaderboardGuru() {
           sakit,
           tidakPresensi,
           totalHariAktif,
-          persentaseKehadiran: Math.round(persentaseKehadiran * 10) / 10, // 1 desimal
-          persentaseTepatWaktu: Math.round(persentaseTepatWaktu * 10) / 10, // 1 desimal
-          skor: Math.round(skor * 10) / 10 // 1 desimal
+          totalMenit,
+          persentaseKehadiran: Math.round(persentaseKehadiran * 10) / 10,
+          persentaseTepatWaktu: Math.round(persentaseTepatWaktu * 10) / 10,
+          persentaseDurasi: Math.round(persentaseDurasi * 10) / 10,
+          skor: Math.round(skor * 10) / 10
         }
       })
 
@@ -424,17 +441,17 @@ function LeaderboardGuru() {
         <div className="mt-4 p-4 bg-white rounded-lg border-2 border-blue-100">
           <p className="text-xs font-semibold text-gray-700 mb-2">📊 Cara Perhitungan Skor:</p>
           <div className="grid grid-cols-1 sm:grid-cols-2 gap-2 text-xs text-gray-600">
-            <div>• <strong>Skor = (Kehadiran × 70%) + (Tepat Waktu × 30%)</strong></div>
+            <div>• <strong>Skor = (Hadir 50%) + (Disiplin 30%) + (Jam Kerja 20%)</strong></div>
             <div>• Periode: {getPeriodLabel()}</div>
-            <div>• <strong>Kehadiran</strong>: Total hadir / Total hari aktif</div>
-            <div>• <strong>Tepat Waktu</strong>: Hadir tepat / Total hadir</div>
-            <div>• 🏆 Top 3 = Ranking tertinggi</div>
+            <div>• <strong>Hadir</strong>: Total hadir / Total hari aktif</div>
+            <div>• <strong>Disiplin</strong>: Hadir tepat waktu / Total hadir</div>
+            <div>• <strong>Jam Kerja</strong>: Total durasi kerja guru</div>
+            <div>• 👑 Top 3 = Ranking tertinggi</div>
             <div>• ⭐ Skor ≥90% = Excellent</div>
-            <div>• ✓ Skor ≥75% = Good</div>
-            <div>• <strong>Juara</strong>: Selalu hadir + Selalu tepat waktu</div>
+            <div>• <strong>Juara</strong>: Rajin Masuk + Cepat Datang + Paling Lama Bekerja</div>
           </div>
           <div className="mt-3 p-2 bg-blue-50 rounded text-xs text-blue-800">
-            <strong>💡 Tips Jadi Juara:</strong> Hadir setiap hari + Tidak pernah terlambat = Skor 100%
+            <strong>💡 Tips Jadi Juara:</strong> Datang lebih awal + Pulang tepat waktu/lembur + Tidak pernah bolos = Skor 100%
           </div>
         </div>
       </div>
