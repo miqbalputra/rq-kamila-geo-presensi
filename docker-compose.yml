@@ -1,0 +1,29 @@
+version: '3.8'
+
+services:
+  app:
+    build: .
+    ports:
+      - "80:80"
+    environment:
+      - DB_HOST=db
+      - DB_NAME=geopresensi
+      - DB_USER=user
+      - DB_PASS=password
+    depends_on:
+      - db
+
+  db:
+    image: mariadb:10.11
+    environment:
+      - MARIADB_DATABASE=geopresensi
+      - MARIADB_USER=user
+      - MARIADB_PASSWORD=password
+      - MARIADB_ROOT_PASSWORD=rootpassword
+    volumes:
+      - db_data:/var/lib/mysql
+      # Uncomment to initialize database on first run
+      # - ./database.sql:/docker-entrypoint-initdb.d/database.sql
+
+volumes:
+  db_data:
