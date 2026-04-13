@@ -228,8 +228,8 @@ function App() {
           <div className="fixed bottom-20 left-4 right-4 z-50 animate-bounce">
             <div className="bg-white rounded-2xl shadow-2xl p-4 flex items-center justify-between border-2 border-blue-500">
               <div className="flex items-center gap-3">
-                <div className="w-12 h-12 bg-blue-100 rounded-xl flex items-center justify-center">
-                  <Download className="w-6 h-6 text-blue-600" />
+                <div className="w-12 h-12 flex items-center justify-center">
+                  <img src="/logo.png" alt="App Logo" className="w-10 h-10 object-contain" />
                 </div>
                 <div>
                   <h4 className="font-bold text-gray-800 text-sm">Presensi RQ Kamila</h4>

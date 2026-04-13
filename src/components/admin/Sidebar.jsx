@@ -35,6 +35,9 @@ function Sidebar({ user, onLogout, isOpen, setIsOpen }) {
       `}>
         {/* Header - Fixed */}
         <div className="flex-shrink-0 p-6 border-b border-blue-800 bg-blue-900">
+          <div className="mb-4">
+            <img src="/logo.png" alt="Logo RQ Kamila" className="h-12 w-auto object-contain" />
+          </div>
           <div className="flex items-center justify-between">
             <h2 className="text-xl font-bold">Presensi RQ Kamila</h2>
             <button
