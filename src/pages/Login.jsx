@@ -47,8 +47,8 @@ function Login({ onLogin }) {
           <div className="inline-flex items-center justify-center w-16 h-16 bg-blue-100 rounded-full mb-4">
             <LogIn className="w-8 h-8 text-blue-600" />
           </div>
-          <h1 className="text-3xl font-bold text-gray-800">Geo-Presensi GQ</h1>
-          <p className="text-gray-600 mt-2">Sistem Presensi Geolocation & QR Code</p>
+          <h1 className="text-3xl font-bold text-gray-800">Geo Presensi Rumah Qur'an Kamila</h1>
+          <p className="text-gray-600 mt-2">Rumah Qur'an Kamila - Geolocation & QR Code</p>
         </div>
 
         <form onSubmit={handleSubmit} className="space-y-6">
@@ -98,7 +98,7 @@ function Login({ onLogin }) {
         <div className="mt-6 text-center text-sm text-gray-500">
           <p className="mb-1">Supported by SistemFlow</p>
           <p>
-            Hak Cipta © 2025{' '}
+            Hak Cipta © 2026{' '}
             <a
               href="https://sistemflow.com"
               target="_blank"
