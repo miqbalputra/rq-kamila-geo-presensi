@@ -2,9 +2,9 @@
   RewriteEngine On
   RewriteBase /
   
-  # Force HTTPS - Redirect HTTP to HTTPS
-  RewriteCond %{HTTPS} off
-  RewriteRule ^(.*)$ https://%{HTTP_HOST}%{REQUEST_URI} [L,R=301]
+  # Force HTTPS - Di-disable karena Dokploy sudah menangani SSL di level load balancer
+  # RewriteCond %{HTTPS} off
+  # RewriteRule ^(.*)$ https://%{HTTP_HOST}%{REQUEST_URI} [L,R=301]
   
   # Jangan redirect jika request ke folder api
   RewriteCond %{REQUEST_URI} ^/api/ [OR]
