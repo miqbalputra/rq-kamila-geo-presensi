@@ -67,3 +67,26 @@ generate_password.php
 generate_miputra_password.php
 reset_admin_miputra.php
 
+# Backup and Documentation Cleanup
+docs-and-sql-backup/
+geo-subdomain/
+DEPLOY_GEOPRESENSI/
+*.html
+!index.html
+!public/**/*.html
+*.js
+!*.config.js
+!src/**/*
+!public/**/*
+!api/**/*
+!check_headers.js
+!convert_xlsx.js
+!fix_download_laporan_dates.js
+*.json
+!package.json
+!package-lock.json
+!n8n_workflow_reminder_presensi.json
+!src/**/*
+!public/**/*
+!*.agent/*.json
+docs/

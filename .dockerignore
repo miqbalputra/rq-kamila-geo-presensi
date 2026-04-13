@@ -1,0 +1,16 @@
+.git
+node_modules
+dist
+.env
+.env.local
+*.zip
+*.sql
+*.md
+*.txt
+*.ps1
+.vscode
+.agent
+logs/
+api/logs/
+api/webhook_error.log
+api/webhook_success.log
