@@ -16,7 +16,7 @@ if (in_array($method, ['POST', 'PUT', 'DELETE'])) {
 if ($method === 'GET' && !isset($_GET['id']) && !isset($_GET['today'])) {
     try {
         $query = "SELECT jp.id, jp.user_id, jp.nama_guru, jp.hari, jp.jam_piket, 
-                         jp.keterangan, jp.created_at, jp.updated_at, u.username 
+                         jp.keterangan, u.username 
                   FROM jadwal_piket jp 
                   LEFT JOIN users u ON jp.user_id = u.id 
                   WHERE 1=1";
@@ -69,7 +69,7 @@ if ($method === 'GET' && isset($_GET['today'])) {
         
         $stmt = $pdo->prepare("
             SELECT jp.id, jp.user_id, jp.nama_guru, jp.hari, jp.jam_piket, 
-                   jp.keterangan, jp.created_at, jp.updated_at, u.username 
+                   jp.keterangan, u.username 
             FROM jadwal_piket jp 
             LEFT JOIN users u ON jp.user_id = u.id 
             WHERE jp.hari = ?

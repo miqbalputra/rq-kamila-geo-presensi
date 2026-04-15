@@ -169,7 +169,7 @@ if ($method === 'POST') {
                     }
 
                     // Update jam pulang
-                    $stmt = $pdo->prepare("UPDATE attendance_logs SET jam_pulang = ?, updated_at = NOW() WHERE id = ?");
+                    $stmt = $pdo->prepare("UPDATE attendance_logs SET jam_pulang = ? WHERE id = ?");
                     $stmt->execute([$currentTime, $existing['id']]);
                     
                     // Log activity untuk pulang
