@@ -11,7 +11,9 @@ function QRScanner({ onClose, onSuccess, attendanceStatus, settings }) {
     const [manualInput, setManualInput] = useState(false)
     const [manualQRData, setManualQRData] = useState('')
     const [location, setLocation] = useState(null)
+    const locationRef = useRef(null)
     const [facingMode, setFacingMode] = useState('environment')
+    const [isHttps, setIsHttps] = useState(true)
 
     const scannerRef = useRef(null)
     const isMounted = useRef(true)       // Guard: jangan update state setelah unmount
@@ -23,7 +25,24 @@ function QRScanner({ onClose, onSuccess, attendanceStatus, settings }) {
     const safeSetScanning = useCallback((v) => { if (isMounted.current) setScanning(v) }, [])
     const safeSetProcessing = useCallback((v) => { if (isMounted.current) setProcessing(v) }, [])
     const safeSetSuccessMsg = useCallback((v) => { if (isMounted.current) setSuccessMsg(v) }, [])
-    const safeSetLocation = useCallback((v) => { if (isMounted.current) setLocation(v) }, [])
+    
+    const safeSetLocation = useCallback((v) => { 
+        if (isMounted.current) {
+            setLocation(v)
+            locationRef.current = v
+        } 
+    }, [])
+
+    // Check HTTPS on mount
+    useEffect(() => {
+        const secure = window.location.protocol === 'https:' || 
+                      window.location.hostname === 'localhost' || 
+                      window.location.hostname === '127.0.0.1'
+        setIsHttps(secure)
+        if (!secure) {
+            safeSetError('Browser memblokir GPS karena website tidak menggunakan HTTPS. Mohon gunakan HTTPS.')
+        }
+    }, [safeSetError])
 
     // Helper: schedule timeout dan track agar bisa di-clear saat unmount
     const safeTimeout = useCallback((fn, ms) => {
@@ -184,20 +203,25 @@ function QRScanner({ onClose, onSuccess, attendanceStatus, settings }) {
 
     // Handler utama ketika QR terdeteksi
     const handleQRDetected = useCallback(async (qrData) => {
-        // Gunakan ref agar tidak ada race condition meski di-call berkali-kali
         if (isProcessing.current) return
         isProcessing.current = true
 
         if (navigator.vibrate) navigator.vibrate(100)
 
-        // Stop scanner lebih dulu sebelum proses API
-        await stopScanner()
+        // Tunggu sebentar jika lokasi belum ada (max 3 detik)
+        if (!locationRef.current && settings?.mode_testing !== '1') {
+            safeSetProcessing(true)
+            for (let i = 0; i < 6; i++) {
+                await new Promise(r => setTimeout(r, 500))
+                if (locationRef.current) break
+            }
+        }
 
         safeSetProcessing(true)
         safeSetError('')
 
         try {
-            let currentLocation = location
+            let currentLocation = locationRef.current
             const TESTING_MODE = settings?.mode_testing == '1'
 
             if (!currentLocation) {
@@ -207,13 +231,15 @@ function QRScanner({ onClose, onSuccess, attendanceStatus, settings }) {
                         longitude: parseFloat(settings?.sekolah_longitude || 119.4327)
                     }
                 } else {
-                    throw new Error('Menunggu koordinat GPS... Mohon aktifkan GPS atau izinkan akses lokasi.')
+                    throw new Error('Gagal mendapatkan koordinat GPS. Pastikan GPS aktif dan izin diberikan!')
                 }
             }
 
+            // Stop scanner setelah lokasi siap
+            await stopScanner()
+
             const isPulang = attendanceStatus?.has_checked_in && !attendanceStatus?.has_checked_out
 
-            // Panggil API — fetchAPI akan throw jika success:false
             const response = await qrScanAPI.submit(
                 qrData,
                 currentLocation.latitude,
@@ -221,30 +247,25 @@ function QRScanner({ onClose, onSuccess, attendanceStatus, settings }) {
                 isPulang
             )
 
-            // Berhasil!
-            if (!isMounted.current) return // komponen sudah unmount, jangan lakukan apapun
+            if (!isMounted.current) return
 
             safeSetProcessing(false)
             safeSetSuccessMsg(response.message || 'Presensi Berhasil!')
 
-            // Tampilkan success 1.5 detik lalu panggil onSuccess di parent
             safeTimeout(() => {
                 if (onSuccess) onSuccess()
             }, 1500)
 
         } catch (err) {
             if (!isMounted.current) return
-
-            isProcessing.current = false // reset agar bisa scan lagi
+            isProcessing.current = false
             safeSetProcessing(false)
             safeSetError(err.message || 'Gagal memproses QR Code')
-
-            // Reset state scanning setelah 1.5 detik agar user bisa coba lagi
-            safeTimeout(() => {
-                safeSetScanning(false)
-            }, 1500)
+            // Don't stop scanner on error so they can try again, 
+            // but we did stop it above, so let's restart if needed or just let them click manual
+            safeSetScanning(false)
         }
-    }, [location, settings, attendanceStatus, stopScanner, onSuccess,
+    }, [settings, attendanceStatus, stopScanner, onSuccess,
         safeSetError, safeSetProcessing, safeSetSuccessMsg, safeSetScanning, safeTimeout])
 
     const handleManualSubmit = useCallback(() => {
