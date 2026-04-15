@@ -16,6 +16,7 @@ function GuruModal({ guru, onClose, onSave }) {
     password: '',
     role: 'guru',
     activeDays: '1,2,3,4,5',
+    activeDays2: '',
     workStartTime: '07:30',
     workEndTime: '15:00',
     workStartTime2: '',
@@ -50,6 +51,7 @@ function GuruModal({ guru, onClose, onSave }) {
         jabatan: jabatanArray,
         tipeGuru: guru.tipeGuru || 'full_time',
         activeDays: guru.activeDays || '1,2,3,4,5',
+        activeDays2: guru.activeDays2 || '',
         workStartTime: guru.workStartTime ? guru.workStartTime.substring(0, 5) : '07:30',
         workEndTime: guru.workEndTime ? guru.workEndTime.substring(0, 5) : '15:00',
         workStartTime2: guru.workStartTime2 ? guru.workStartTime2.substring(0, 5) : '',
@@ -86,6 +88,17 @@ function GuruModal({ guru, onClose, onSave }) {
       days.splice(index, 1)
     }
     setFormData({ ...formData, activeDays: days.sort().join(',') })
+  }
+
+  const toggleDay2 = (day) => {
+    const days = formData.activeDays2.split(',').filter(d => d !== '')
+    const index = days.indexOf(day.toString())
+    if (index === -1) {
+      days.push(day.toString())
+    } else {
+      days.splice(index, 1)
+    }
+    setFormData({ ...formData, activeDays2: days.sort().join(',') })
   }
 
   const daysLabels = {
@@ -286,6 +299,27 @@ function GuruModal({ guru, onClose, onSave }) {
 
             <div className="pt-2 border-t border-blue-100">
               <label className="block text-xs font-bold text-blue-800 mb-2 uppercase tracking-tight">Shift ke-2 (Opsional / Split Shift)</label>
+              
+              <div className="mb-3">
+                <label className="block text-xs font-semibold text-blue-600 mb-2">Hari Aktif Shift 2</label>
+                <div className="flex flex-wrap gap-2">
+                  {[1, 2, 3, 4, 5, 6, 7].map(day => (
+                    <button
+                      key={day}
+                      type="button"
+                      onClick={() => toggleDay2(day)}
+                      className={`px-3 py-1.5 rounded-lg text-[10px] font-bold transition-all ${
+                        formData.activeDays2.split(',').includes(day.toString())
+                          ? 'bg-indigo-600 text-white'
+                          : 'bg-white text-indigo-600 border border-indigo-200'
+                      }`}
+                    >
+                      {daysLabels[day]}
+                    </button>
+                  ))}
+                </div>
+              </div>
+
               <div className="grid grid-cols-2 gap-4">
                 <div>
                   <label className="block text-xs font-semibold text-blue-600 mb-1">Masuk 2</label>

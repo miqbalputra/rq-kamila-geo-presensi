@@ -156,6 +156,14 @@ if ($method === 'POST') {
             } 
             // 2. Cek Sesi 2 Masuk (jam_masuk_2 masih kosong, tapi jadwal Shift 2 ada)
             else if (!$existing['jam_masuk_2'] && !empty($user['work_start_time_2'])) {
+                // VALIDASI HARI UNTUK SHIFT 2
+                $todayDay = date('N'); // 1 (Sen) - 7 (Min)
+                $activeDays2 = !empty($user['active_days_2']) ? explode(',', $user['active_days_2']) : [];
+                
+                if (!in_array($todayDay, $activeDays2)) {
+                    sendResponse(false, 'Hari ini Anda tidak memiliki jadwal untuk Sesi 2.');
+                }
+
                 $stmt = $pdo->prepare("UPDATE attendance_logs SET jam_masuk_2 = ? WHERE id = ?");
                 $stmt->execute([$currentTime, $existing['id']]);
                 
