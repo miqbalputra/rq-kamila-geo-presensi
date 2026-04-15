@@ -465,14 +465,9 @@ function GuruHome({ user }) {
     }
   }
 
-  // Fungsi untuk cek apakah tombol pulang bisa ditampilkan (minimal jam 09:00)
+  // Fungsi untuk cek apakah tombol pulang bisa ditampilkan (Batasan 09:00 sudah dihapus)
   const canShowPulangButton = () => {
-    const currentHour = new Date().getHours()
-    const currentMinute = new Date().getMinutes()
-    const currentTimeInMinutes = (currentHour * 60) + currentMinute
-    const minTimeInMinutes = (9 * 60) + 0 // 09:00 = 540 menit
-
-    return currentTimeInMinutes >= minTimeInMinutes
+    return true
   }
 
   const handlePulang = async () => {
@@ -484,19 +479,7 @@ function GuruHome({ user }) {
       return
     }
 
-    // Cek waktu minimal (09:00 WIB)
-    const currentHour = new Date().getHours()
-    const currentMinute = new Date().getMinutes()
-    const currentTimeInMinutes = (currentHour * 60) + currentMinute
-    const minTimeInMinutes = (9 * 60) + 0 // 09:00 = 540 menit
-
-    if (currentTimeInMinutes < minTimeInMinutes) {
-      setMessage({
-        type: 'error',
-        text: 'Presensi pulang hanya bisa dilakukan mulai pukul 09:00 WIB'
-      })
-      return
-    }
+    // Batasan jam 09:00 dihapus sesuai permintaan user
 
     setLoading(true)
     setMessage({ type: '', text: '' })
@@ -760,27 +743,17 @@ function GuruHome({ user }) {
 
                 {!isIzinSakit && settings.button_enabled == '1' && (status === 'hadir' || isHadirTerlambat || isIzinTerlambat) && !todayAttendance.jamPulang && !todayAttendance.jam_pulang && (
                   <>
-                    {canShowPulangButton() ? (
-                      <button
-                        onClick={handlePulang}
-                        disabled={loading}
-                        className="w-full bg-indigo-600 text-white py-4 rounded-2xl font-bold text-base hover:bg-indigo-700 disabled:bg-slate-300 disabled:text-slate-500 flex items-center justify-center gap-3 shadow-sm transition-all"
-                      >
-                        <CheckCircle className="w-5 h-5" />
-                        {loading ? 'Memproses...' : 'PRESENSI PULANG'}
-                      </button>
-                    ) : (
                       <div className="bg-slate-50 border border-slate-200 rounded-2xl p-4 text-center">
-                        <p className="text-slate-600 font-semibold text-sm">⏰ Presensi pulang tersedia mulai 09:00 WIB</p>
-                        <p className="text-xs text-slate-400 mt-1">Silakan tunggu hingga jam 09:00</p>
+                        <p className="text-slate-600 font-semibold text-sm">📅 Belum saatnya pulang?</p>
+                        <p className="text-xs text-slate-400 mt-1">Gunakan tombol di atas jika Anda ingin pulang lebih awal</p>
                       </div>
-                    )}
                   </>
                 )}
 
                 {!isIzinSakit && (status === 'hadir' || isHadirTerlambat || isIzinTerlambat) && (todayAttendance.jamPulang || todayAttendance.jam_pulang) && (
-                  <div className="bg-emerald-50 border border-emerald-200 rounded-2xl p-3.5 text-center">
-                    <p className="text-emerald-700 font-semibold text-sm">\u2713 Presensi pulang sudah tercatat</p>
+                  <div className="bg-emerald-50 border border-emerald-100 rounded-2xl p-4 flex items-center justify-center gap-2">
+                    <CheckCircle className="w-5 h-5 text-emerald-500" />
+                    <p className="text-emerald-700 font-bold text-sm">Presensi pulang sudah tercatat</p>
                   </div>
                 )}
               </>
