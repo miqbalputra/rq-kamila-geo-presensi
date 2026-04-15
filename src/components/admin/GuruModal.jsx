@@ -46,6 +46,7 @@ function GuruModal({ guru, onClose, onSave }) {
       setFormData({ 
         ...guru, 
         jabatan: jabatanArray,
+        tipeGuru: guru.tipeGuru || 'full_time',
         activeDays: guru.activeDays || '1,2,3,4,5',
         workStartTime: guru.workStartTime ? guru.workStartTime.substring(0, 5) : '07:30',
         workEndTime: guru.workEndTime ? guru.workEndTime.substring(0, 5) : '15:00'

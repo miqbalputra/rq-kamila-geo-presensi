@@ -147,7 +147,7 @@ function DataGuru() {
       'Tanggal Bertugas': guru.tanggalBertugas,
       'Lama Bertugas': calculateWorkDuration(guru.tanggalBertugas),
       'Username': guru.username,
-      'Password': guru.password,
+      'Tipe Guru': guru.tipeGuru === 'partime' ? 'Partime' : 'Full Time',
       'Jadwal Kerja': `${guru.workStartTime?.substring(0, 5)} - ${guru.workEndTime?.substring(0, 5)}`,
       'Hari Aktif': guru.activeDays || '1,2,3,4,5'
     }))
@@ -196,6 +196,7 @@ function DataGuru() {
           idGuru: row['ID Guru'] || row['id guru'] || `GQ${String(dataGuru.length + index + 1).padStart(3, '0')}`,
           username: generatedUserPass,
           password: generatedUserPass,
+          tipeGuru: row['Tipe Guru'] === 'Partime' ? 'partime' : 'full_time',
           role: 'guru'
         };
       });
@@ -330,6 +331,7 @@ function DataGuru() {
                 <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Lama Bertugas</th>
                 <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Username</th>
                 <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Password</th>
+                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Tipe</th>
                 <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Jadwal Kerja</th>
                 <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Aksi</th>
               </tr>
@@ -367,6 +369,11 @@ function DataGuru() {
                   </td>
                   <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-600">{guru.username}</td>
                   <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-600">{'•'.repeat(guru.password?.length || 8)}</td>
+                  <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-600">
+                    <span className={`px-2 py-1 rounded-full text-[10px] font-bold ${guru.tipeGuru === 'partime' ? 'bg-amber-100 text-amber-700' : 'bg-blue-100 text-blue-700'}`}>
+                      {guru.tipeGuru === 'partime' ? 'Partime' : 'Full Time'}
+                    </span>
+                  </td>
                   <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-600">
                     <div className="flex flex-col">
                       <span className="font-bold text-blue-700">{guru.workStartTime?.substring(0, 5)} - {guru.workEndTime?.substring(0, 5)}</span>

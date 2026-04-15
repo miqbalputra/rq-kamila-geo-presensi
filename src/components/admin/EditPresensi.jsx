@@ -68,7 +68,7 @@ function EditPresensi({ user }) {
       if (editingLog) {
         // Update existing log via API
         const isHadirType = formData.status === 'hadir' || formData.status === 'hadir_izin_terlambat'
-        const jamMasukValue = isHadirType ? (formData.jamMasuk || editingLog.jamMasuk) : '-'
+        const jamMasukValue = isHadirType ? (formData.jamMasuk || editingLog.jamMasuk) : null
         
         // Jam pulang: hanya gunakan nilai dari form.
         // Jika form kosong → null (tidak mengubah/menghapus jam pulang yang sudah ada).
@@ -120,7 +120,7 @@ function EditPresensi({ user }) {
 
         // Add new log via API
         const isHadirType = formData.status === 'hadir' || formData.status === 'hadir_izin_terlambat'
-        const jamMasukValue = isHadirType ? (formData.jamMasuk || currentTime) : '-'
+        const jamMasukValue = isHadirType ? (formData.jamMasuk || currentTime) : null
         
         const createData = {
           userId: guru.id,

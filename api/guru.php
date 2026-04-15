@@ -101,6 +101,8 @@ if ($method === 'POST') {
             VALUES (?, ?, ?, 'guru', ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
         ");
         
+        $tipeGuru = (!empty($data['tipeGuru'])) ? $data['tipeGuru'] : 'full_time';
+        
         $stmt->execute([
             $data['idGuru'],
             $data['username'],
@@ -112,7 +114,7 @@ if ($method === 'POST') {
             $data['noHP'],
             $jabatan,
             $data['tanggalBertugas'],
-            $data['tipeGuru'] ?? 'full_time',
+            $tipeGuru,
             $data['activeDays'] ?? '1,2,3,4,5',
             $data['workStartTime'] ?? '07:30:00',
             $data['workEndTime'] ?? '15:00:00'
@@ -159,6 +161,7 @@ if ($method === 'PUT') {
             }
             
             $hashedPassword = password_hash($data['password'], PASSWORD_DEFAULT);
+            $tipeGuru = (!empty($data['tipeGuru'])) ? $data['tipeGuru'] : 'full_time';
             $stmt = $pdo->prepare("
                 UPDATE users SET 
                     id_guru = ?, username = ?, password = ?, nama = ?, 
@@ -178,7 +181,7 @@ if ($method === 'PUT') {
                 $data['noHP'],
                 $jabatan,
                 $data['tanggalBertugas'],
-                $data['tipeGuru'] ?? 'full_time',
+                $tipeGuru,
                 $data['activeDays'] ?? '1,2,3,4,5',
                 $data['workStartTime'] ?? '07:30:00',
                 $data['workEndTime'] ?? '15:00:00',
@@ -186,6 +189,7 @@ if ($method === 'PUT') {
             ]);
         } else {
             // Update tanpa password
+            $tipeGuru = (!empty($data['tipeGuru'])) ? $data['tipeGuru'] : 'full_time';
             $stmt = $pdo->prepare("
                 UPDATE users SET 
                     id_guru = ?, username = ?, nama = ?, 
@@ -204,7 +208,7 @@ if ($method === 'PUT') {
                 $data['noHP'],
                 $jabatan,
                 $data['tanggalBertugas'],
-                $data['tipeGuru'] ?? 'full_time',
+                $tipeGuru,
                 $data['activeDays'] ?? '1,2,3,4,5',
                 $data['workStartTime'] ?? '07:30:00',
                 $data['workEndTime'] ?? '15:00:00',
