@@ -375,9 +375,18 @@ function DataGuru() {
                     </span>
                   </td>
                   <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-600">
-                    <div className="flex flex-col">
-                      <span className="font-bold text-blue-700">{guru.workStartTime?.substring(0, 5)} - {guru.workEndTime?.substring(0, 5)}</span>
-                      <span className="text-[10px] text-gray-400">Hari: {guru.activeDays?.split(',').map(d => ['Min','Sen','Sel','Rab','Kam','Jum','Sab'][d%7]).join(', ') || '-'}</span>
+                    <div className="flex flex-col gap-1">
+                      <div className="flex flex-col">
+                        <span className="font-bold text-blue-700">{guru.workStartTime?.substring(0, 5)} - {guru.workEndTime?.substring(0, 5)}</span>
+                        <span className="text-[10px] text-gray-400">Shift 1</span>
+                      </div>
+                      {guru.workStartTime2 && (
+                        <div className="flex flex-col border-t border-gray-100 pt-1">
+                          <span className="font-bold text-indigo-600">{guru.workStartTime2?.substring(0, 5)} - {guru.workEndTime2?.substring(0, 5)}</span>
+                          <span className="text-[10px] text-gray-400">Shift 2</span>
+                        </div>
+                      )}
+                      <span className="text-[10px] text-gray-400 font-medium">Hari: {guru.activeDays?.split(',').map(d => ['Min','Sen','Sel','Rab','Kam','Jum','Sab'][d%7]).join(', ') || '-'}</span>
                     </div>
                   </td>
                   <td className="px-6 py-4 whitespace-nowrap text-sm">

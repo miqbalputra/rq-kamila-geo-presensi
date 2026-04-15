@@ -142,38 +142,36 @@ if ($method === 'POST') {
         }
         
         // Cek apakah sudah presensi hari ini
-        $stmt = $pdo->prepare("SELECT id, status, jam_masuk, jam_pulang FROM attendance_logs WHERE user_id = ? AND tanggal = ?");
+        $stmt = $pdo->prepare("SELECT * FROM attendance_logs WHERE user_id = ? AND tanggal = ?");
         $stmt->execute([$userId, $today]);
         $existing = $stmt->fetch();
         
         if ($existing) {
-            // Cek apakah ini percobaan Pulang (jam_pulang masih kosong) — berlaku untuk semua tipe guru
+            // 1. Cek Sesi 1 Pulang (jam_pulang masih kosong)
             if (!$existing['jam_pulang']) {
-                // SMART DETECT: Otomatis anggap pulang jika sudah ada data masuk hari ini
-                // Hapus batasan jam 09:00 sesuai permintaan user
-                $isPulangRequest = true;
-
-                if ($isPulangRequest) {
-                    // Update jam pulang
-                    $stmt = $pdo->prepare("UPDATE attendance_logs SET jam_pulang = ? WHERE id = ?");
-                    $stmt->execute([$currentTime, $existing['id']]);
-                    
-                    // Log activity untuk pulang
-                    try {
-                        $stmtLog = $pdo->prepare("INSERT INTO activity_logs (user, aktivitas, status) VALUES (?, ?, ?)");
-                        $stmtLog->execute([$userName, 'Presensi Pulang (Smart QR)', 'Sukses']);
-                    } catch (Exception $e) { /* Ignore */ }
-
-                    sendResponse(true, 'Presensi pulang berhasil (Smart Scan)!', [
-                        'jam_pulang' => $currentTime,
-                        'message' => 'Hati-hati di jalan!'
-                    ]);
-                } else {
-                    sendResponse(false, 'Anda sudah presensi masuk. Belum bisa presensi pulang sebelum pukul 09:00 WIB.');
-                }
-            } else {
-                sendResponse(false, 'Anda sudah melakukan lengkap presensi (Masuk & Pulang) hari ini.');
+                $stmt = $pdo->prepare("UPDATE attendance_logs SET jam_pulang = ? WHERE id = ?");
+                $stmt->execute([$currentTime, $existing['id']]);
+                
+                sendResponse(true, 'Presensi pulang sesi 1 berhasil!', ['jam_pulang' => $currentTime]);
+            } 
+            // 2. Cek Sesi 2 Masuk (jam_masuk_2 masih kosong, tapi jadwal Shift 2 ada)
+            else if (!$existing['jam_masuk_2'] && !empty($user['work_start_time_2'])) {
+                $stmt = $pdo->prepare("UPDATE attendance_logs SET jam_masuk_2 = ? WHERE id = ?");
+                $stmt->execute([$currentTime, $existing['id']]);
+                
+                sendResponse(true, 'Presensi MASUK Sesi 2 (Malam) berhasil!', ['jam_masuk_2' => $currentTime]);
             }
+            // 3. Cek Sesi 2 Pulang (jam_pulang_2 masih kosong)
+            else if ($existing['jam_masuk_2'] && !$existing['jam_pulang_2']) {
+                $stmt = $pdo->prepare("UPDATE attendance_logs SET jam_pulang_2 = ? WHERE id = ?");
+                $stmt->execute([$currentTime, $existing['id']]);
+                
+                sendResponse(true, 'Presensi PULANG Sesi 2 berhasil!', ['jam_pulang_2' => $currentTime]);
+            }
+            else {
+                sendResponse(false, 'Anda sudah melakukan lengkap presensi hari ini (Sesi 1 & 2).');
+            }
+            exit;
         }
         
         // Guru partime: langsung hadir tanpa cek keterlambatan

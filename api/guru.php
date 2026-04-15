@@ -25,6 +25,8 @@ if ($method === 'GET' && !isset($_GET['id'])) {
             $g['activeDays'] = $g['active_days'];
             $g['workStartTime'] = $g['work_start_time'];
             $g['workEndTime'] = $g['work_end_time'];
+            $g['workStartTime2'] = $g['work_start_time_2'];
+            $g['workEndTime2'] = $g['work_end_time_2'];
             
             unset($g['password']); // Hapus password dari response
         }
@@ -57,6 +59,8 @@ if ($method === 'GET' && isset($_GET['id'])) {
             $guru['activeDays'] = $guru['active_days'];
             $guru['workStartTime'] = $guru['work_start_time'];
             $guru['workEndTime'] = $guru['work_end_time'];
+            $guru['workStartTime2'] = $guru['work_start_time_2'];
+            $guru['workEndTime2'] = $guru['work_end_time_2'];
             
             unset($guru['password']);
             sendResponse(true, 'Data guru ditemukan', $guru);
@@ -97,8 +101,8 @@ if ($method === 'POST') {
         $hashedPassword = password_hash($data['password'], PASSWORD_DEFAULT);
         
         $stmt = $pdo->prepare("
-            INSERT INTO users (id_guru, username, password, role, nama, tanggal_lahir, jenis_kelamin, alamat, no_hp, jabatan, tanggal_bertugas, tipe_guru, active_days, work_start_time, work_end_time)
-            VALUES (?, ?, ?, 'guru', ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+            INSERT INTO users (id_guru, username, password, role, nama, tanggal_lahir, jenis_kelamin, alamat, no_hp, jabatan, tanggal_bertugas, tipe_guru, active_days, work_start_time, work_end_time, work_start_time_2, work_end_time_2)
+            VALUES (?, ?, ?, 'guru', ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
         ");
         
         $tipeGuru = (!empty($data['tipeGuru'])) ? $data['tipeGuru'] : 'full_time';
@@ -117,7 +121,9 @@ if ($method === 'POST') {
             $tipeGuru,
             $data['activeDays'] ?? '1,2,3,4,5',
             $data['workStartTime'] ?? '07:30:00',
-            $data['workEndTime'] ?? '15:00:00'
+            $data['workEndTime'] ?? '15:00:00',
+            (!empty($data['workStartTime2'])) ? $data['workStartTime2'] : null,
+            (!empty($data['workEndTime2'])) ? $data['workEndTime2'] : null
         ]);
         
         sendResponse(true, 'Guru berhasil ditambahkan', ['id' => $pdo->lastInsertId()]);
@@ -167,7 +173,8 @@ if ($method === 'PUT') {
                     id_guru = ?, username = ?, password = ?, nama = ?, 
                     tanggal_lahir = ?, jenis_kelamin = ?, alamat = ?, no_hp = ?, 
                     jabatan = ?, tanggal_bertugas = ?, tipe_guru = ?,
-                    active_days = ?, work_start_time = ?, work_end_time = ?
+                    active_days = ?, work_start_time = ?, work_end_time = ?,
+                    work_start_time_2 = ?, work_end_time_2 = ?
                 WHERE id = ?
             ");
             $result = $stmt->execute([
@@ -185,6 +192,8 @@ if ($method === 'PUT') {
                 $data['activeDays'] ?? '1,2,3,4,5',
                 $data['workStartTime'] ?? '07:30:00',
                 $data['workEndTime'] ?? '15:00:00',
+                (!empty($data['workStartTime2'])) ? $data['workStartTime2'] : null,
+                (!empty($data['workEndTime2'])) ? $data['workEndTime2'] : null,
                 $data['id']
             ]);
         } else {
@@ -195,7 +204,8 @@ if ($method === 'PUT') {
                     id_guru = ?, username = ?, nama = ?, 
                     tanggal_lahir = ?, jenis_kelamin = ?, alamat = ?, no_hp = ?, 
                     jabatan = ?, tanggal_bertugas = ?, tipe_guru = ?,
-                    active_days = ?, work_start_time = ?, work_end_time = ?
+                    active_days = ?, work_start_time = ?, work_end_time = ?,
+                    work_start_time_2 = ?, work_end_time_2 = ?
                 WHERE id = ?
             ");
             $result = $stmt->execute([
@@ -212,6 +222,8 @@ if ($method === 'PUT') {
                 $data['activeDays'] ?? '1,2,3,4,5',
                 $data['workStartTime'] ?? '07:30:00',
                 $data['workEndTime'] ?? '15:00:00',
+                (!empty($data['workStartTime2'])) ? $data['workStartTime2'] : null,
+                (!empty($data['workEndTime2'])) ? $data['workEndTime2'] : null,
                 $data['id']
             ]);
         }

@@ -17,7 +17,9 @@ function GuruModal({ guru, onClose, onSave }) {
     role: 'guru',
     activeDays: '1,2,3,4,5',
     workStartTime: '07:30',
-    workEndTime: '15:00'
+    workEndTime: '15:00',
+    workStartTime2: '',
+    workEndTime2: ''
   })
 
   // Auto-fill username dan password jika tanggal lahir diisi (untuk guru baru)
@@ -49,7 +51,9 @@ function GuruModal({ guru, onClose, onSave }) {
         tipeGuru: guru.tipeGuru || 'full_time',
         activeDays: guru.activeDays || '1,2,3,4,5',
         workStartTime: guru.workStartTime ? guru.workStartTime.substring(0, 5) : '07:30',
-        workEndTime: guru.workEndTime ? guru.workEndTime.substring(0, 5) : '15:00'
+        workEndTime: guru.workEndTime ? guru.workEndTime.substring(0, 5) : '15:00',
+        workStartTime2: guru.workStartTime2 ? guru.workStartTime2.substring(0, 5) : '',
+        workEndTime2: guru.workEndTime2 ? guru.workEndTime2.substring(0, 5) : ''
       })
     }
   }, [guru])
@@ -278,6 +282,31 @@ function GuruModal({ guru, onClose, onSave }) {
                   required
                 />
               </div>
+            </div>
+
+            <div className="pt-2 border-t border-blue-100">
+              <label className="block text-xs font-bold text-blue-800 mb-2 uppercase tracking-tight">Shift ke-2 (Opsional / Split Shift)</label>
+              <div className="grid grid-cols-2 gap-4">
+                <div>
+                  <label className="block text-xs font-semibold text-blue-600 mb-1">Masuk 2</label>
+                  <input
+                    type="time"
+                    value={formData.workStartTime2}
+                    onChange={(e) => setFormData({ ...formData, workStartTime2: e.target.value })}
+                    className="w-full px-3 py-2 border border-blue-100 rounded-lg focus:ring-2 focus:ring-blue-500 text-sm bg-white"
+                  />
+                </div>
+                <div>
+                  <label className="block text-xs font-semibold text-blue-600 mb-1">Pulang 2</label>
+                  <input
+                    type="time"
+                    value={formData.workEndTime2}
+                    onChange={(e) => setFormData({ ...formData, workEndTime2: e.target.value })}
+                    className="w-full px-3 py-2 border border-blue-100 rounded-lg focus:ring-2 focus:ring-blue-500 text-sm bg-white"
+                  />
+                </div>
+              </div>
+              <p className="mt-2 text-[10px] text-blue-500 italic">Isi jika guru mengajar dua kali (misal: Sesi Malam)</p>
             </div>
           </div>
 
