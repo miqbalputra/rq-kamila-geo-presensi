@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react'
-import { Save, MapPin, Map, Users, Calendar, Info, ToggleLeft, ToggleRight, CheckCircle, XCircle, Loader } from 'lucide-react'
+import { Save, MapPin, Map, Users, Info, ToggleLeft, ToggleRight, CheckCircle, XCircle, Loader } from 'lucide-react'
 import { settingsAPI } from '../../services/api'
 
 // Default values untuk semua setting lokasi
@@ -8,11 +8,10 @@ const DEFAULT_SETTINGS = {
   sekolah_longitude: '',
   lokasi_laki_latitude: '',
   lokasi_laki_longitude: '',
+  lokasi_laki_enabled: '1',
   lokasi_perempuan_latitude: '',
   lokasi_perempuan_longitude: '',
-  lokasi_apel_latitude: '',
-  lokasi_apel_longitude: '',
-  apel_senin_enabled: '0',
+  lokasi_perempuan_enabled: '1',
   radius_gps: '100'
 }
 
@@ -68,30 +67,31 @@ function LokasiGeofence({ user }) {
     }
   }
 
-  // Toggle apel senin on/off
-  const toggleApel = async () => {
+  // Toggle switch on/off
+  const toggleFeature = async (key, label) => {
     if (savingKey) return
-    const newValue = settings.apel_senin_enabled === '1' ? '0' : '1'
+    const newValue = settings[key] === '1' ? '0' : '1'
+    
     // Optimistic update
-    setSettings(prev => ({ ...prev, apel_senin_enabled: newValue }))
+    setSettings(prev => ({ ...prev, [key]: newValue }))
+    
     try {
-      setSavingKey('apel_toggle')
-      await settingsAPI.update('apel_senin_enabled', newValue)
+      setSavingKey(key)
+      await settingsAPI.update(key, newValue)
       showNotification(
-        newValue === '1' ? 'Apel Senin diaktifkan!' : 'Apel Senin dinonaktifkan!',
+        `${label} ${newValue === '1' ? 'diaktifkan' : 'dinonaktifkan'}!`,
         'success'
       )
     } catch (error) {
       // Rollback jika gagal
-      setSettings(prev => ({ ...prev, apel_senin_enabled: newValue === '1' ? '0' : '1' }))
-      showNotification('Gagal memperbarui status apel: ' + error.message, 'error')
+      setSettings(prev => ({ ...prev, [key]: newValue === '1' ? '0' : '1' }))
+      showNotification('Gagal memperbarui status: ' + error.message, 'error')
     } finally {
       setSavingKey(null)
     }
   }
 
   const isSaving = (key) => savingKey === key
-  const apelEnabled = settings.apel_senin_enabled === '1'
 
   if (loading) {
     return (
@@ -127,209 +127,17 @@ function LokasiGeofence({ user }) {
       {/* Grid Lokasi */}
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
 
-        {/* LOKASI APEL SENIN */}
+        {/* LOKASI SEKOLAH (PUSAT) */}
         <div className="bg-white rounded-2xl shadow-sm border border-gray-100 overflow-hidden">
-          <div className="p-4 bg-gradient-to-r from-blue-600 to-blue-700 text-white flex justify-between items-center">
+          <div className="p-4 bg-gradient-to-r from-gray-700 to-gray-800 text-white flex justify-between items-center">
             <div className="flex items-center gap-2">
-              <Calendar className="w-5 h-5" />
-              <h3 className="font-bold text-lg">Lokasi Apel Pagi (Senin)</h3>
+              <MapPin className="w-5 h-5" />
+              <h3 className="font-bold text-lg">Lokasi Sekolah (Pusat)</h3>
             </div>
-            {/* Toggle Apel Senin */}
-            <button
-              onClick={toggleApel}
-              disabled={savingKey === 'apel_toggle' || isReadOnly}
-              className="flex items-center gap-2 hover:opacity-80 transition-opacity disabled:opacity-50 disabled:cursor-not-allowed"
-              title={isReadOnly ? 'Akses hanya lihat' : apelEnabled ? 'Klik untuk menonaktifkan apel Senin' : 'Klik untuk mengaktifkan apel Senin'}
-            >
-              {savingKey === 'apel_toggle' ? (
-                <Loader className="w-8 h-8 animate-spin" />
-              ) : apelEnabled ? (
-                <ToggleRight className="w-8 h-8 text-green-300" />
-              ) : (
-                <ToggleLeft className="w-8 h-8 opacity-50" />
-              )}
-              <span className="text-xs font-bold min-w-[28px]">
-                {apelEnabled ? 'AKTIF' : 'OFF'}
-              </span>
-            </button>
+            <span className="text-[10px] bg-white/20 px-2 py-0.5 rounded-full font-bold">FALLBACK UTAMA</span>
           </div>
           <div className="p-6 space-y-4">
-            {/* Status badge */}
-            <div className={`flex items-center gap-2 text-sm font-medium px-3 py-2 rounded-lg ${apelEnabled ? 'bg-green-50 text-green-700 border border-green-200' : 'bg-gray-50 text-gray-500 border border-gray-200'}`}>
-              {apelEnabled ? <CheckCircle className="w-4 h-4" /> : <XCircle className="w-4 h-4" />}
-              {apelEnabled
-                ? 'Aktif: Hari Senin hanya bisa presensi di titik apel ini'
-                : 'Nonaktif: Apel Senin tidak diwajibkan'}
-            </div>
-            <p className="text-sm text-gray-600">Titik kumpul seluruh guru di hari Senin pagi untuk apel bersama.</p>
-            <div className="grid grid-cols-2 gap-4">
-              <div>
-                <label className="block text-xs font-bold text-gray-500 uppercase mb-1">Latitude</label>
-                <input
-                  type="number"
-                  step="0.000001"
-                  value={settings.lokasi_apel_latitude}
-                  onChange={(e) => handleChange('lokasi_apel_latitude', e.target.value)}
-                  className="w-full px-3 py-2 border rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 outline-none disabled:bg-gray-50 disabled:text-gray-500"
-                  placeholder="-7.123456"
-                  disabled={isReadOnly}
-                />
-              </div>
-              <div>
-                <label className="block text-xs font-bold text-gray-500 uppercase mb-1">Longitude</label>
-                <input
-                  type="number"
-                  step="0.000001"
-                  value={settings.lokasi_apel_longitude}
-                  onChange={(e) => handleChange('lokasi_apel_longitude', e.target.value)}
-                  className="w-full px-3 py-2 border rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 outline-none disabled:bg-gray-50 disabled:text-gray-500"
-                  placeholder="112.123456"
-                  disabled={isReadOnly}
-                />
-              </div>
-            </div>
-            <div className="flex gap-2">
-              <button
-                onClick={() => handleSavePair('apel', 'lokasi_apel_latitude', 'lokasi_apel_longitude', 'Titik Apel')}
-                disabled={isSaving('apel') || isReadOnly}
-                className="flex-1 bg-blue-600 text-white py-2 rounded-lg font-bold flex items-center justify-center gap-2 hover:bg-blue-700 disabled:opacity-60 disabled:cursor-not-allowed transition-colors"
-              >
-                {isSaving('apel') ? <Loader className="w-4 h-4 animate-spin" /> : <Save className="w-4 h-4" />}
-                {isSaving('apel') ? 'Menyimpan...' : 'Simpan Titik Apel'}
-              </button>
-              <a
-                href={`https://www.google.com/maps?q=${settings.lokasi_apel_latitude},${settings.lokasi_apel_longitude}`}
-                target="_blank"
-                rel="noreferrer"
-                className="p-2 border rounded-lg hover:bg-gray-50 transition-colors"
-                title="Buka di Google Maps"
-              >
-                <Map className="w-5 h-5 text-gray-600" />
-              </a>
-            </div>
-          </div>
-        </div>
-
-        {/* LOKASI GURU LAKI-LAKI */}
-        <div className="bg-white rounded-2xl shadow-sm border border-gray-100 overflow-hidden">
-          <div className="p-4 bg-blue-900 text-white flex items-center gap-2">
-            <Users className="w-5 h-5" />
-            <h3 className="font-bold text-lg">Pos Guru Laki-laki</h3>
-          </div>
-          <div className="p-6 space-y-4">
-            <p className="text-sm text-gray-600">Titik lokasi presensi khusus guru laki-laki di hari kerja normal.</p>
-            <div className="grid grid-cols-2 gap-4">
-              <div>
-                <label className="block text-xs font-bold text-gray-500 uppercase mb-1">Latitude</label>
-                <input
-                  type="number"
-                  step="0.000001"
-                  value={settings.lokasi_laki_latitude}
-                  onChange={(e) => handleChange('lokasi_laki_latitude', e.target.value)}
-                  className="w-full px-3 py-2 border rounded-lg focus:ring-2 focus:ring-blue-900 focus:border-blue-900 outline-none disabled:bg-gray-50 disabled:text-gray-500"
-                  placeholder="-7.123456"
-                  disabled={isReadOnly}
-                />
-              </div>
-              <div>
-                <label className="block text-xs font-bold text-gray-500 uppercase mb-1">Longitude</label>
-                <input
-                  type="number"
-                  step="0.000001"
-                  value={settings.lokasi_laki_longitude}
-                  onChange={(e) => handleChange('lokasi_laki_longitude', e.target.value)}
-                  className="w-full px-3 py-2 border rounded-lg focus:ring-2 focus:ring-blue-900 focus:border-blue-900 outline-none disabled:bg-gray-50 disabled:text-gray-500"
-                  placeholder="112.123456"
-                  disabled={isReadOnly}
-                />
-              </div>
-            </div>
-            <div className="flex gap-2">
-              <button
-                onClick={() => handleSavePair('laki', 'lokasi_laki_latitude', 'lokasi_laki_longitude', 'Pos Putra')}
-                disabled={isSaving('laki') || isReadOnly}
-                className="flex-1 bg-blue-900 text-white py-2 rounded-lg font-bold flex items-center justify-center gap-2 hover:bg-blue-800 disabled:opacity-60 disabled:cursor-not-allowed transition-colors"
-              >
-                {isSaving('laki') ? <Loader className="w-4 h-4 animate-spin" /> : <Save className="w-4 h-4" />}
-                {isSaving('laki') ? 'Menyimpan...' : 'Simpan Pos Putra'}
-              </button>
-              <a
-                href={`https://www.google.com/maps?q=${settings.lokasi_laki_latitude},${settings.lokasi_laki_longitude}`}
-                target="_blank"
-                rel="noreferrer"
-                className="p-2 border rounded-lg hover:bg-gray-50 transition-colors"
-                title="Buka di Google Maps"
-              >
-                <Map className="w-5 h-5 text-gray-600" />
-              </a>
-            </div>
-          </div>
-        </div>
-
-        {/* LOKASI GURU PEREMPUAN */}
-        <div className="bg-white rounded-2xl shadow-sm border border-gray-100 overflow-hidden">
-          <div className="p-4 bg-pink-600 text-white flex items-center gap-2">
-            <Users className="w-5 h-5" />
-            <h3 className="font-bold text-lg">Pos Guru Perempuan</h3>
-          </div>
-          <div className="p-6 space-y-4">
-            <p className="text-sm text-gray-600">Titik lokasi presensi khusus guru perempuan di hari kerja normal.</p>
-            <div className="grid grid-cols-2 gap-4">
-              <div>
-                <label className="block text-xs font-bold text-gray-500 uppercase mb-1">Latitude</label>
-                <input
-                  type="number"
-                  step="0.000001"
-                  value={settings.lokasi_perempuan_latitude}
-                  onChange={(e) => handleChange('lokasi_perempuan_latitude', e.target.value)}
-                  className="w-full px-3 py-2 border rounded-lg focus:ring-2 focus:ring-pink-500 focus:border-pink-500 outline-none disabled:bg-gray-50 disabled:text-gray-500"
-                  placeholder="-7.123456"
-                  disabled={isReadOnly}
-                />
-              </div>
-              <div>
-                <label className="block text-xs font-bold text-gray-500 uppercase mb-1">Longitude</label>
-                <input
-                  type="number"
-                  step="0.000001"
-                  value={settings.lokasi_perempuan_longitude}
-                  onChange={(e) => handleChange('lokasi_perempuan_longitude', e.target.value)}
-                  className="w-full px-3 py-2 border rounded-lg focus:ring-2 focus:ring-pink-500 focus:border-pink-500 outline-none disabled:bg-gray-50 disabled:text-gray-500"
-                  placeholder="112.123456"
-                  disabled={isReadOnly}
-                />
-              </div>
-            </div>
-            <div className="flex gap-2">
-              <button
-                onClick={() => handleSavePair('perempuan', 'lokasi_perempuan_latitude', 'lokasi_perempuan_longitude', 'Pos Putri')}
-                disabled={isSaving('perempuan') || isReadOnly}
-                className="flex-1 bg-pink-600 text-white py-2 rounded-lg font-bold flex items-center justify-center gap-2 hover:bg-pink-700 disabled:opacity-60 disabled:cursor-not-allowed transition-colors"
-              >
-                {isSaving('perempuan') ? <Loader className="w-4 h-4 animate-spin" /> : <Save className="w-4 h-4" />}
-                {isSaving('perempuan') ? 'Menyimpan...' : 'Simpan Pos Putri'}
-              </button>
-              <a
-                href={`https://www.google.com/maps?q=${settings.lokasi_perempuan_latitude},${settings.lokasi_perempuan_longitude}`}
-                target="_blank"
-                rel="noreferrer"
-                className="p-2 border rounded-lg hover:bg-gray-50 transition-colors"
-                title="Buka di Google Maps"
-              >
-                <Map className="w-5 h-5 text-gray-600" />
-              </a>
-            </div>
-          </div>
-        </div>
-
-        {/* LOKASI SEKOLAH (DEFAULT) */}
-        <div className="bg-white rounded-2xl shadow-sm border border-gray-100 overflow-hidden">
-          <div className="p-4 bg-gray-800 text-white flex items-center gap-2">
-            <MapPin className="w-5 h-5" />
-            <h3 className="font-bold text-lg">Lokasi Sekolah (Pusat)</h3>
-          </div>
-          <div className="p-6 space-y-4">
-            <p className="text-sm text-gray-600">Titik koordinat utama sekolah yang digunakan sebagai fallback.</p>
+            <p className="text-sm text-gray-600">Titik koordinat utama sekolah. Digunakan jika Pos Laki-laki/Perempuan dinonaktifkan.</p>
             <div className="grid grid-cols-2 gap-4">
               <div>
                 <label className="block text-xs font-bold text-gray-500 uppercase mb-1">Latitude</label>
@@ -363,10 +171,174 @@ function LokasiGeofence({ user }) {
                 className="flex-1 bg-gray-800 text-white py-2 rounded-lg font-bold flex items-center justify-center gap-2 hover:bg-gray-900 disabled:opacity-60 disabled:cursor-not-allowed transition-colors"
               >
                 {isSaving('sekolah') ? <Loader className="w-4 h-4 animate-spin" /> : <Save className="w-4 h-4" />}
-                {isSaving('sekolah') ? 'Menyimpan...' : 'Simpan Pusat'}
+                {isSaving('sekolah') ? 'Menyimpan...' : 'Simpan Lokasi Pusat'}
               </button>
               <a
                 href={`https://www.google.com/maps?q=${settings.sekolah_latitude},${settings.sekolah_longitude}`}
+                target="_blank"
+                rel="noreferrer"
+                className="p-2 border rounded-lg hover:bg-gray-50 transition-colors"
+                title="Buka di Google Maps"
+              >
+                <Map className="w-5 h-5 text-gray-600" />
+              </a>
+            </div>
+          </div>
+        </div>
+
+        {/* LOKASI GURU LAKI-LAKI */}
+        <div className="bg-white rounded-2xl shadow-sm border border-gray-100 overflow-hidden">
+          <div className="p-4 bg-blue-900 text-white flex justify-between items-center">
+            <div className="flex items-center gap-2">
+              <Users className="w-5 h-5" />
+              <h3 className="font-bold text-lg">Pos Guru Laki-laki</h3>
+            </div>
+            {/* Toggle Pos Laki-laki */}
+            <button
+              onClick={() => toggleFeature('lokasi_laki_enabled', 'Pos Laki-laki')}
+              disabled={isSaving('lokasi_laki_enabled') || isReadOnly}
+              className="flex items-center gap-2 hover:opacity-80 transition-opacity disabled:opacity-50 disabled:cursor-not-allowed"
+            >
+              {isSaving('lokasi_laki_enabled') ? (
+                <Loader className="w-7 h-7 animate-spin" />
+              ) : settings.lokasi_laki_enabled === '1' ? (
+                <ToggleRight className="w-7 h-7 text-green-300" />
+              ) : (
+                <ToggleLeft className="w-7 h-7 opacity-50" />
+              )}
+              <span className="text-[10px] font-black min-w-[24px]">
+                {settings.lokasi_laki_enabled === '1' ? 'ON' : 'OFF'}
+              </span>
+            </button>
+          </div>
+          <div className="p-6 space-y-4">
+            <div className={`p-3 rounded-xl border flex items-center gap-2 text-xs font-bold ${
+              settings.lokasi_laki_enabled === '1' 
+                ? 'bg-blue-50 text-blue-700 border-blue-200' 
+                : 'bg-gray-50 text-gray-500 border-gray-200'
+            }`}>
+              {settings.lokasi_laki_enabled === '1' ? <CheckCircle className="w-4 h-4" /> : <XCircle className="w-4 h-4" />}
+              {settings.lokasi_laki_enabled === '1' ? 'AKTIF: Guru Laki-laki wajib absen di titik ini' : 'NONAKTIF: Mengikuti Lokasi Pusat'}
+            </div>
+            <div className="grid grid-cols-2 gap-4">
+              <div>
+                <label className="block text-xs font-bold text-gray-500 uppercase mb-1">Latitude</label>
+                <input
+                  type="number"
+                  step="0.000001"
+                  value={settings.lokasi_laki_latitude}
+                  onChange={(e) => handleChange('lokasi_laki_latitude', e.target.value)}
+                  className="w-full px-3 py-2 border rounded-lg focus:ring-2 focus:ring-blue-900 focus:border-blue-900 outline-none disabled:bg-gray-50 disabled:text-gray-500"
+                  placeholder="-7.123456"
+                  disabled={isReadOnly || settings.lokasi_laki_enabled === '0'}
+                />
+              </div>
+              <div>
+                <label className="block text-xs font-bold text-gray-500 uppercase mb-1">Longitude</label>
+                <input
+                  type="number"
+                  step="0.000001"
+                  value={settings.lokasi_laki_longitude}
+                  onChange={(e) => handleChange('lokasi_laki_longitude', e.target.value)}
+                  className="w-full px-3 py-2 border rounded-lg focus:ring-2 focus:ring-blue-900 focus:border-blue-900 outline-none disabled:bg-gray-50 disabled:text-gray-500"
+                  placeholder="112.123456"
+                  disabled={isReadOnly || settings.lokasi_laki_enabled === '0'}
+                />
+              </div>
+            </div>
+            <div className="flex gap-2">
+              <button
+                onClick={() => handleSavePair('laki', 'lokasi_laki_latitude', 'lokasi_laki_longitude', 'Pos Putra')}
+                disabled={isSaving('laki') || isReadOnly || settings.lokasi_laki_enabled === '0'}
+                className="flex-1 bg-blue-900 text-white py-2 rounded-lg font-bold flex items-center justify-center gap-2 hover:bg-blue-800 disabled:opacity-60 disabled:cursor-not-allowed transition-colors"
+              >
+                {isSaving('laki') ? <Loader className="w-4 h-4 animate-spin" /> : <Save className="w-4 h-4" />}
+                {isSaving('laki') ? 'Menyimpan...' : 'Simpan Pos Putra'}
+              </button>
+              <a
+                href={`https://www.google.com/maps?q=${settings.lokasi_laki_latitude},${settings.lokasi_laki_longitude}`}
+                target="_blank"
+                rel="noreferrer"
+                className="p-2 border rounded-lg hover:bg-gray-50 transition-colors"
+                title="Buka di Google Maps"
+              >
+                <Map className="w-5 h-5 text-gray-600" />
+              </a>
+            </div>
+          </div>
+        </div>
+
+        {/* LOKASI GURU PEREMPUAN */}
+        <div className="bg-white rounded-2xl shadow-sm border border-gray-100 overflow-hidden">
+          <div className="p-4 bg-pink-600 text-white flex justify-between items-center">
+            <div className="flex items-center gap-2">
+              <Users className="w-5 h-5" />
+              <h3 className="font-bold text-lg">Pos Guru Perempuan</h3>
+            </div>
+            {/* Toggle Pos Perempuan */}
+            <button
+              onClick={() => toggleFeature('lokasi_perempuan_enabled', 'Pos Perempuan')}
+              disabled={isSaving('lokasi_perempuan_enabled') || isReadOnly}
+              className="flex items-center gap-2 hover:opacity-80 transition-opacity disabled:opacity-50 disabled:cursor-not-allowed"
+            >
+              {isSaving('lokasi_perempuan_enabled') ? (
+                <Loader className="w-7 h-7 animate-spin" />
+              ) : settings.lokasi_perempuan_enabled === '1' ? (
+                <ToggleRight className="w-7 h-7 text-pink-200" />
+              ) : (
+                <ToggleLeft className="w-7 h-7 opacity-50" />
+              )}
+              <span className="text-[10px] font-black min-w-[24px]">
+                {settings.lokasi_perempuan_enabled === '1' ? 'ON' : 'OFF'}
+              </span>
+            </button>
+          </div>
+          <div className="p-6 space-y-4">
+            <div className={`p-3 rounded-xl border flex items-center gap-2 text-xs font-bold ${
+              settings.lokasi_perempuan_enabled === '1' 
+                ? 'bg-pink-50 text-pink-700 border-pink-200' 
+                : 'bg-gray-50 text-gray-500 border-gray-200'
+            }`}>
+              {settings.lokasi_perempuan_enabled === '1' ? <CheckCircle className="w-4 h-4" /> : <XCircle className="w-4 h-4" />}
+              {settings.lokasi_perempuan_enabled === '1' ? 'AKTIF: Guru Perempuan wajib absen di titik ini' : 'NONAKTIF: Mengikuti Lokasi Pusat'}
+            </div>
+            <div className="grid grid-cols-2 gap-4">
+              <div>
+                <label className="block text-xs font-bold text-gray-500 uppercase mb-1">Latitude</label>
+                <input
+                  type="number"
+                  step="0.000001"
+                  value={settings.lokasi_perempuan_latitude}
+                  onChange={(e) => handleChange('lokasi_perempuan_latitude', e.target.value)}
+                  className="w-full px-3 py-2 border rounded-lg focus:ring-2 focus:ring-pink-500 focus:border-pink-500 outline-none disabled:bg-gray-50 disabled:text-gray-500"
+                  placeholder="-7.123456"
+                  disabled={isReadOnly || settings.lokasi_perempuan_enabled === '0'}
+                />
+              </div>
+              <div>
+                <label className="block text-xs font-bold text-gray-500 uppercase mb-1">Longitude</label>
+                <input
+                  type="number"
+                  step="0.000001"
+                  value={settings.lokasi_perempuan_longitude}
+                  onChange={(e) => handleChange('lokasi_perempuan_longitude', e.target.value)}
+                  className="w-full px-3 py-2 border rounded-lg focus:ring-2 focus:ring-pink-500 focus:border-pink-500 outline-none disabled:bg-gray-50 disabled:text-gray-500"
+                  placeholder="112.123456"
+                  disabled={isReadOnly || settings.lokasi_perempuan_enabled === '0'}
+                />
+              </div>
+            </div>
+            <div className="flex gap-2">
+              <button
+                onClick={() => handleSavePair('perempuan', 'lokasi_perempuan_latitude', 'lokasi_perempuan_longitude', 'Pos Putri')}
+                disabled={isSaving('perempuan') || isReadOnly || settings.lokasi_perempuan_enabled === '0'}
+                className="flex-1 bg-pink-600 text-white py-2 rounded-lg font-bold flex items-center justify-center gap-2 hover:bg-pink-700 disabled:opacity-60 disabled:cursor-not-allowed transition-colors"
+              >
+                {isSaving('perempuan') ? <Loader className="w-4 h-4 animate-spin" /> : <Save className="w-4 h-4" />}
+                {isSaving('perempuan') ? 'Menyimpan...' : 'Simpan Pos Putri'}
+              </button>
+              <a
+                href={`https://www.google.com/maps?q=${settings.lokasi_perempuan_latitude},${settings.lokasi_perempuan_longitude}`}
                 target="_blank"
                 rel="noreferrer"
                 className="p-2 border rounded-lg hover:bg-gray-50 transition-colors"
@@ -383,16 +355,16 @@ function LokasiGeofence({ user }) {
       {/* Panduan */}
       <div className="bg-blue-50 border-2 border-blue-200 rounded-2xl p-6">
         <h4 className="font-bold text-blue-800 mb-3 text-lg flex items-center gap-2">
-          <Info className="w-5 h-5" /> Panduan Penggunaan
+          <Info className="w-5 h-5" /> Panduan Penggunaan Geofence
         </h4>
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-4 text-sm text-blue-700">
-          <div className="space-y-2">
-            <p><strong>1. Koordinat:</strong> Ambil koordinat dari Google Maps. Klik kanan di lokasi Maps dan pilih angka koordinatnya.</p>
-            <p><strong>2. Validasi Hari Senin:</strong> Jika tombol AKTIF, maka di hari Senin sistem HANYA mengizinkan presensi di Lokasi Apel Pagi (untuk Laki-laki &amp; Perempuan).</p>
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-6 text-sm text-blue-700">
+          <div className="space-y-3">
+            <p><strong>1. Pos Khusus:</strong> Gunakan saklar <strong>ON/OFF</strong> di Pos Laki-laki atau Perempuan jika lokasi presensi mereka terpisah dari gedung utama.</p>
+            <p><strong>2. Mode Fallback:</strong> Jika saklar disetel <strong>OFF</strong>, maka guru tersebut akan divalidasi menggunakan koordinat <strong>Lokasi Sekolah (Pusat)</strong>.</p>
           </div>
-          <div className="space-y-2">
-            <p><strong>3. Validasi Gender:</strong> Di hari selain Senin, sistem otomatis memverifikasi lokasi sesuai gender guru di database.</p>
-            <p><strong>4. Radius:</strong> Pastikan guru berada dalam jarak radius yang ditentukan (saat ini {settings.radius_gps}m) agar presensi berhasil.</p>
+          <div className="space-y-3">
+            <p><strong>3. Koordinat:</strong> Ambil koordinat dari Google Maps (Klik kanan di peta &gt; pilih angka koordinat).</p>
+            <p><strong>4. Radius:</strong> Pastikan guru berada dalam jarak radius aktif ({settings.radius_gps}m) agar presensi berhasil.</p>
           </div>
         </div>
       </div>

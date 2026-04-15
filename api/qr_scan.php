@@ -93,28 +93,19 @@ if ($method === 'POST') {
 
         if (!$isTestingMode) {
             $dayOfWeek = date('w'); // 0 (Sunday) to 6 (Saturday)
-            $isMonday = ($dayOfWeek == 1);
-            
             $targetLat = floatval($settings['sekolah_latitude'] ?? 0);
             $targetLon = floatval($settings['sekolah_longitude'] ?? 0);
-            $locationName = "Sekolah";
+            $locationName = "Lokasi Pusat";
 
-            // 1. Cek Hari Senin (Apel)
-            if ($isMonday && ($settings['apel_senin_enabled'] ?? '0') == '1') {
-                $targetLat = floatval($settings['lokasi_apel_latitude'] ?? $targetLat);
-                $targetLon = floatval($settings['lokasi_apel_longitude'] ?? $targetLon);
-                $locationName = "Lokasi Apel Senin";
-            } else {
-                // 2. Jika bukan Senin, gunakan lokasi berbasis Gender
-                if ($user['jenis_kelamin'] === 'Laki-laki') {
-                    $targetLat = floatval($settings['lokasi_laki_latitude'] ?? $targetLat);
-                    $targetLon = floatval($settings['lokasi_laki_longitude'] ?? $targetLon);
-                    $locationName = "Area Guru Laki-laki";
-                } else if ($user['jenis_kelamin'] === 'Perempuan') {
-                    $targetLat = floatval($settings['lokasi_perempuan_latitude'] ?? $targetLat);
-                    $targetLon = floatval($settings['lokasi_perempuan_longitude'] ?? $targetLon);
-                    $locationName = "Area Guru Perempuan";
-                }
+            // Gunakan lokasi berbasis Gender jika saklar ON
+            if ($user['jenis_kelamin'] === 'Laki-laki' && ($settings['lokasi_laki_enabled'] ?? '0') === '1') {
+                $targetLat = floatval($settings['lokasi_laki_latitude'] ?? $targetLat);
+                $targetLon = floatval($settings['lokasi_laki_longitude'] ?? $targetLon);
+                $locationName = "Pos Guru Laki-laki";
+            } else if ($user['jenis_kelamin'] === 'Perempuan' && ($settings['lokasi_perempuan_enabled'] ?? '0') === '1') {
+                $targetLat = floatval($settings['lokasi_perempuan_latitude'] ?? $targetLat);
+                $targetLon = floatval($settings['lokasi_perempuan_longitude'] ?? $targetLon);
+                $locationName = "Pos Guru Perempuan";
             }
 
             $radius = intval($settings['radius_gps'] ?? 100);
