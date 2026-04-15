@@ -164,13 +164,7 @@ if ($method === 'PUT') {
     $data = getRequestData();
     
     try {
-        // VALIDASI JAM PULANG - Minimal Jam 09:00 WIB (Hanya untuk Guru)
-        if ($_SESSION['role'] === 'guru' && !empty($data['jamPulang'])) {
-            $currentHour = intval(date('H'));
-            if ($currentHour < 9) {
-                sendResponse(false, 'Presensi pulang hanya bisa dilakukan mulai pukul 09:00 WIB');
-            }
-        }
+        // Batasan jam 09:00 dihapus sesuai permintaan user
 
         $stmt = $pdo->prepare("
             UPDATE attendance_logs SET 

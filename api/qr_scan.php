@@ -156,18 +156,11 @@ if ($method === 'POST') {
         if ($existing) {
             // Cek apakah ini percobaan Pulang (jam_pulang masih kosong) — berlaku untuk semua tipe guru
             if (!$existing['jam_pulang']) {
-                // SMART DETECT: Otomatis anggap pulang jika sudah lewat jam 09:00 WIB
-                // ATAU jika is_pulang dikirim true eksplisit (boolean true ATAU string '1')
-                $currentHour = intval(date('H'));
-                $isPulangFlag = isset($data['is_pulang']) && ($data['is_pulang'] === true || $data['is_pulang'] === 1 || $data['is_pulang'] === '1');
-                $isPulangRequest = $isPulangFlag || ($currentHour >= 9);
+                // SMART DETECT: Otomatis anggap pulang jika sudah ada data masuk hari ini
+                // Hapus batasan jam 09:00 sesuai permintaan user
+                $isPulangRequest = true;
 
                 if ($isPulangRequest) {
-                    // VALIDASI JAM PULANG - Minimal Jam 09:00 WIB (Force tetap 09:00 untuk non-admin)
-                    if ($currentHour < 9 && $_SESSION['role'] !== 'admin') {
-                        sendResponse(false, 'Presensi pulang hanya bisa dilakukan mulai pukul 09:00 WIB');
-                    }
-
                     // Update jam pulang
                     $stmt = $pdo->prepare("UPDATE attendance_logs SET jam_pulang = ? WHERE id = ?");
                     $stmt->execute([$currentTime, $existing['id']]);
