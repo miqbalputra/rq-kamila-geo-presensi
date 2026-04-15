@@ -12,8 +12,8 @@ $method = $_SERVER['REQUEST_METHOD'];
 // - POST    : hanya admin
 // - DELETE  : hanya admin
 $role = $_SESSION['role'] ?? '';
-if ($method === 'POST' && $role !== 'admin') {
-    sendResponse(false, 'Forbidden: Hanya admin yang dapat menambah data presensi');
+if ($method === 'POST' && !in_array($role, ['admin', 'guru'])) {
+    sendResponse(false, 'Forbidden: Anda tidak memiliki akses untuk menambah data presensi');
 }
 if ($method === 'DELETE' && $role !== 'admin') {
     sendResponse(false, 'Forbidden: Hanya admin yang dapat menghapus data presensi');
@@ -101,8 +101,14 @@ if ($method === 'GET' && !isset($_GET['id'])) {
 // CREATE PRESENSI
 if ($method === 'POST') {
     $data = getRequestData();
-    
+    $role = $_SESSION['role'] ?? '';
+    $currentUserId = $_SESSION['user_id'] ?? null;
+
     try {
+        // SECURITY: Guru hanya boleh post data untuk DIRINYA SENDIRI
+        if ($role === 'guru' && $data['userId'] != $currentUserId) {
+            sendResponse(false, 'Forbidden: Anda hanya dapat menambah data presensi untuk diri sendiri');
+        }
         // Validasi tanggal
         if (!validateDate($data['tanggal'])) {
             sendResponse(false, 'Format tanggal tidak valid');
