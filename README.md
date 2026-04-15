@@ -60,4 +60,4 @@ Pengaturan utama di menu **"Lokasi & Geofence"**:
 
 ---
 **Presensi RQ Kamila** - *Membangun Kedisiplinan dengan Teknologi Modern.*
-**Versi:** 3.5.0 | **Hak Cipta © 2026** - Rumah Qur'an Kamila
+**Versi:** 3.5.0 | **Hak Cipta © 2026** - SistemFlow.com
