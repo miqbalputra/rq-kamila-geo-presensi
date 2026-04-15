@@ -46,8 +46,8 @@ if ($method === 'PUT') {
         // Validasi setting_key yang diizinkan sesuai fitur LENGKAP 2026
         $allowedKeys = [
             'jam_masuk_normal', 'toleransi_terlambat', 'radius_gps', 'sekolah_latitude', 'sekolah_longitude', 'sekolah_nama', 'mode_testing',
-            'lokasi_laki_latitude', 'lokasi_laki_longitude', 'lokasi_perempuan_latitude', 'lokasi_perempuan_longitude',
-            'lokasi_apel_latitude', 'lokasi_apel_longitude', 'apel_senin_enabled',
+            'lokasi_laki_latitude', 'lokasi_laki_longitude', 'lokasi_laki_enabled',
+            'lokasi_perempuan_latitude', 'lokasi_perempuan_longitude', 'lokasi_perempuan_enabled',
             'qr_secret', 'qr_enabled', 'piket_terlambat_adalah_terlambat', 'jam_piket_default', 'button_enabled'
         ];
         if (!in_array($data['setting_key'], $allowedKeys)) {
