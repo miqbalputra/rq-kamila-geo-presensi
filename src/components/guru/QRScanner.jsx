@@ -55,19 +55,28 @@ function QRScanner({ onClose, onSuccess, attendanceStatus, settings }) {
         }
     }, [])
 
-    // Load GPS location
+    // Load GPS location with Watcher for better reliability
     useEffect(() => {
         if (!navigator.geolocation) {
             safeSetError('Geolokasi tidak didukung oleh browser Anda')
             return
         }
-        navigator.geolocation.getCurrentPosition(
+
+        const options = {
+            enableHighAccuracy: true,
+            timeout: 15000,
+            maximumAge: 0
+        }
+
+        const watchId = navigator.geolocation.watchPosition(
             (position) => {
+                console.log('📍 GPS Update:', position.coords.latitude, position.coords.longitude, '±', position.coords.accuracy, 'm')
                 safeSetLocation({
                     latitude: position.coords.latitude,
                     longitude: position.coords.longitude,
                     accuracy: position.coords.accuracy
                 })
+                safeSetError('') // Clear any previous timeout/gps errors if we get a lock
             },
             (err) => {
                 console.error('GPS Error:', err)
@@ -77,15 +86,20 @@ function QRScanner({ onClose, onSuccess, attendanceStatus, settings }) {
                         longitude: parseFloat(settings?.sekolah_longitude || 119.4327),
                         accuracy: 0
                     })
-                } else {
+                } else if (!location) {
+                    // Hanya set error jika lokasi benar-benar belum didapat sama sekali
                     let msg = 'Gagal mendapatkan lokasi.'
-                    if (err.code === 1) msg = 'Izin lokasi ditolak. Mohon aktifkan GPS dan izinkan akses lokasi di browser.'
-                    if (err.code === 3) msg = 'Waktu pencarian lokasi habis (Timeout). Pastikan Anda berada di area terbuka.'
+                    if (err.code === 1) msg = 'Izin lokasi ditolak. Mohon aktifkan GPS.'
+                    if (err.code === 3) msg = 'Mencari sinyal GPS... (Timeout). Mohon tunggu di area yang terbuka.'
                     safeSetError(msg)
                 }
             },
-            { enableHighAccuracy: true, timeout: 15000, maximumAge: 0 }
+            options
         )
+
+        return () => {
+            if (watchId) navigator.geolocation.clearWatch(watchId)
+        }
     }, [settings, safeSetError, safeSetLocation])
 
     // Stop scanner helper
