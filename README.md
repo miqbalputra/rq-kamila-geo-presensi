@@ -1,4 +1,4 @@
-# 📱 Presensi RQ Kamila
+# 📱 Presensi RQ Kamila 
 ### Sistem Absensi Guru Berbasis Lokasi (GPS) & QR Code - Rumah Qur'an Kamila
 
 Aplikasi web modern yang dirancang untuk mengelola kehadiran guru secara akurat, transparan, dan real-time. Menggunakan validasi Geofencing (GPS) dan QR Code untuk menjamin kehadiran fisik guru di sekolah.
@@ -12,57 +12,52 @@ Aplikasi web modern yang dirancang untuk mengelola kehadiran guru secara akurat,
 
 ---
 
-## 🚀 Fitur Unggulan
+## 🚀 Fitur Unggulan Terbaru (v3.5)
 
-### 🏫 Manajemen Kehadiran (Geofencing)
-*   **Validasi Radius Sekolah:** Presensi hanya bisa dilakukan jika guru berada dalam radius yang ditentukan (default 20-50m) dari titik koordinat RQ Kamila.
-*   **Dual Mode Presensi:** Guru dapat memilih antara menekan tombol **"HADIR"** atau melakukan **"SCAN QR CODE"**.
-*   **Jadwal Individu Guru:** Setiap guru memiliki jadwal masuk dan pulang yang berbeda-beda sesuai kebijakan sekolah, lengkap dengan validasi keterlambatan otomatis per guru.
-*   **Tipe Guru (Full Time / Part Time):** Mendukung guru tetap yang memerlukan absen masuk/pulang reguler, maupun guru part-time (sekali scan langsung hadir).
+### 🌓 Split Shift & Dual Session (NEW)
+*   **Dukungan Sesi Ganda:** Guru dapat memiliki dua jadwal kerja dalam satu hari (misal: Sesi Pagi & Sesi Malam).
+*   **Jadwal Hari Fleksibel:** Shift ke-2 dapat diatur aktif pada hari-hari tertentu saja, berbeda dengan hari kerja utama.
+*   **Smart QR Scan:** Sistem otomatis mendeteksi sesi mana yang sedang di-scan (Masuk 1, Pulang 1, Masuk 2, atau Pulang 2).
+
+### 📍 Geofencing Fleksibel
+*   **Saklar Posisi Guru:** Admin dapat mengaktifkan/menonaktifkan titik koordinat khusus untuk **Pos Guru Laki-laki** dan **Pos Guru Perempuan**.
+*   **Fallback Lokasi Pusat:** Jika pos khusus dimatikan, sistem otomatis beralih menggunakan koordinat **Pusat Sekolah**.
+
+### 🤒 Manajemen Izin Mandiri
+*   **Self-Reporting:** Guru kini dapat melaporkan status **Sakit** atau **Izin** secara mandiri langsung dari aplikasi tanpa menunggu input admin.
+*   **Validasi Keamanan:** Guru hanya diizinkan menginput data untuk dirinya sendiri dengan proteksi session sisi server.
 
 ### 🏆 Gamifikasi & Leaderboard
-*   **Leaderboard Guru:** Pemeringkatan guru paling rajin dan disiplin berdasarkan rumus: **Hadir (50%) + Disiplin/Tepat Waktu (30%) + Jam Kerja/Durasi (20%)**.
-*   **Badge Penghargaan:** Pemberian badge otomatis (Juara 1, 2, 3, Excellent, Good) untuk memotivasi kedisiplinan guru.
-
-### 👮 Manajemen Operasional
-*   **Jadwal Piket Digital:** Penugasan guru piket harian yang terintegrasi dengan dashboard.
-*   **Manajemen Hari Libur:** Kalender libur sekolah (Nasional/Sekolah) yang secara otomatis menonaktifkan fitur presensi.
-*   **Dashboard Real-time:** Grafik tren kehadiran, persentase kehadiran harian, dan daftar guru yang belum hadir.
-
-### 📊 Administrasi & Pelaporan
-*   **Download Laporan (Excel):** Admin dapat mengunduh laporan kehadiran per periode atau per guru dengan satu klik.
-*   **Log Aktivitas:** Rekam jejak digital (Audit Trail) untuk setiap aksi penting di sistem (Login, Tambah/Hapus Guru, Edit Lokasi, dll).
+*   **Leaderboard Dinamis:** Pemeringkatan guru berdasarkan rumus: **Hadir (50%) + Disiplin (30%) + Jam Kerja (20%)**.
+*   **Badge Penghargaan:** Pemberian badge otomatis (Juara 1, 2, 3, Excellent, Good) di dashboard guru.
 
 ---
 
-## 🛠️ Tech Stack
-*   **Frontend:** React.js (Vite), Tailwind CSS, Lucide Icons, Recharts (PWA Ready).
-*   **Backend:** PHP API (RESTful).
+## 🛠️ Tech Stack & Security
+*   **Frontend:** React.js (Vite), Tailwind CSS, Lucide Icons.
+*   **Backend:** PHP API (RESTful) dengan proteksi JWT-less session.
 *   **Database:** MariaDB / MySQL.
-*   **Infrastructure:** VPS Managed via Dokploy.
+*   **Security:** Wajib menggunakan **HTTPS** untuk akses Geolocation API di browser mobile.
 
 ---
 
 ## 🆘 Troubleshooting (Masalah Umum)
 
-### 1. Masalah: "Gagal Mendapatkan Lokasi"
-*   Pastikan GPS HP Aktif dan dalam mode Google Akurasi Tinggi.
-*   Berikan izin (Allow) saat browser meminta akses lokasi.
-*   Jika berada di dalam gedung beton yang sangat tebal, geser sedikit ke dekat jendela.
+### 1. Masalah: "Menunggu Koordinat GPS..."
+*   **Solusi:** Pastikan Anda mengakses menggunakan protokol **HTTPS**. Browser modern memblokir akses GPS pada koneksi HTTP biasa.
+*   **Browser:** Gunakan Google Chrome atau Safari versi terbaru.
 
-### 2. Masalah: "Anda berada di luar jangkauan"
-*   Pastikan berada di area sekolah RQ Kamila.
-*   Tunggu 10 detik agar GPS HP mendapatkan koordinat yang lebih presisi.
-*   Hubungi Admin jika titik koordinat sekolah perlu dikalibrasi ulang di menu Pengaturan.
+### 2. Masalah: "Gagal Menyimpan (Forbidden)"
+*   **Solusi:** Pastikan guru menginput tanggal yang benar. Sistem melarang penginputan data untuk user ID lain.
 
 ---
 
-## 📍 Konfigurasi Sistem
-Konfigurasi utama dapat diatur melalui menu **"Pengaturan"** di Dashboard Admin:
-*   `radius_gps`: Batas jarak maksimal presensi.
-*   `latitude_sekolah` & `longitude_sekolah`: Titik pusat sekolah.
-*   `waktu_mulai_presensi_pulang`: Batas awal jam pulang dapat diklik.
+## 📍 Konfigurasi Sistem (Admin Only)
+Pengaturan utama di menu **"Lokasi & Geofence"**:
+*   `radius_gps`: Toleransi jarak (meter).
+*   `lokasi_laki_enabled` / `lokasi_perempuan_enabled`: Saklar pos khusus gender.
+*   `latitude` & `longitude`: Titik koordinat pusat dan pos-pos guru.
 
 ---
 **Presensi RQ Kamila** - *Membangun Kedisiplinan dengan Teknologi Modern.*
-**Versi:** 3.0.0 | **Hak Cipta © 2026** - Rumah Qur'an Kamila
+**Versi:** 3.5.0 | **Hak Cipta © 2026** - Rumah Qur'an Kamila
