@@ -101,7 +101,7 @@ if ($method === 'POST') {
 
             // 1. Cek Hari Senin (Apel)
             if ($isMonday && ($settings['apel_senin_enabled'] ?? '0') == '1') {
-            $targetLat = floatval($settings['lokasi_apel_latitude'] ?? $targetLat);
+                $targetLat = floatval($settings['lokasi_apel_latitude'] ?? $targetLat);
                 $targetLon = floatval($settings['lokasi_apel_longitude'] ?? $targetLon);
                 $locationName = "Lokasi Apel Senin";
             } else {
@@ -125,7 +125,9 @@ if ($method === 'POST') {
             $distance = calculateDistance($userLat, $userLon, $targetLat, $targetLon);
             
             if ($distance > $radius) {
-                sendResponse(false, "Anda berada di luar area {$locationName}. Jarak: {$distance}m, Maksimal: {$radius}m");
+                $userCoords = "({$userLat}, {$userLon})";
+                $targetCoords = "({$targetLat}, {$targetLon})";
+                sendResponse(false, "Anda berada di luar area {$locationName}.\n\nJarak Anda: {$distance}m\nMaksimal: {$radius}m\n\nLokasi Anda: {$userCoords}\nTarget: {$targetCoords}");
             }
         }
         

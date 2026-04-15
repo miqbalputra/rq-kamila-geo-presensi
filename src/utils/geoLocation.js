@@ -22,16 +22,24 @@ export const getUserLocation = () => {
       return
     }
 
+    const options = {
+      enableHighAccuracy: true,
+      timeout: 10000,
+      maximumAge: 0
+    }
+
     navigator.geolocation.getCurrentPosition(
       (position) => {
         resolve({
           latitude: position.coords.latitude,
-          longitude: position.coords.longitude
+          longitude: position.coords.longitude,
+          accuracy: position.coords.accuracy // Ambil informasi akurasi (dalam meter)
         })
       },
       (error) => {
         reject(error)
-      }
+      },
+      options
     )
   })
 }

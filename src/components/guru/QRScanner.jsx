@@ -65,7 +65,8 @@ function QRScanner({ onClose, onSuccess, attendanceStatus, settings }) {
             (position) => {
                 safeSetLocation({
                     latitude: position.coords.latitude,
-                    longitude: position.coords.longitude
+                    longitude: position.coords.longitude,
+                    accuracy: position.coords.accuracy
                 })
             },
             (err) => {
@@ -73,13 +74,17 @@ function QRScanner({ onClose, onSuccess, attendanceStatus, settings }) {
                 if (settings?.mode_testing === '1') {
                     safeSetLocation({
                         latitude: parseFloat(settings?.sekolah_latitude || -5.1477),
-                        longitude: parseFloat(settings?.sekolah_longitude || 119.4327)
+                        longitude: parseFloat(settings?.sekolah_longitude || 119.4327),
+                        accuracy: 0
                     })
                 } else {
-                    safeSetError('Gagal mendapatkan lokasi. Pastikan GPS aktif.')
+                    let msg = 'Gagal mendapatkan lokasi.'
+                    if (err.code === 1) msg = 'Izin lokasi ditolak. Mohon aktifkan GPS dan izinkan akses lokasi di browser.'
+                    if (err.code === 3) msg = 'Waktu pencarian lokasi habis (Timeout). Pastikan Anda berada di area terbuka.'
+                    safeSetError(msg)
                 }
             },
-            { enableHighAccuracy: true, timeout: 5000, maximumAge: 0 }
+            { enableHighAccuracy: true, timeout: 15000, maximumAge: 0 }
         )
     }, [settings, safeSetError, safeSetLocation])
 
