@@ -144,16 +144,23 @@ if ($method === 'POST') {
             VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
         ");
         
+        // Helper untuk membersihkan format jam agar tidak error SQL ''
+        $cleanTime = function($val) {
+            if (is_null($val)) return null;
+            $v = trim($val);
+            return ($v === '' || $v === '-' || $v === '00:00:00' || $v === '00:00') ? null : $v;
+        };
+
         $stmt->execute([
             $data['userId'],
             $data['nama'],
             $data['tanggal'],
             $data['status'],
-            (!empty($data['jamMasuk']) && $data['jamMasuk'] !== '-') ? $data['jamMasuk'] : null,
-            (!empty($data['jamPulang']) && $data['jamPulang'] !== '-') ? $data['jamPulang'] : null,
-            (!empty($data['jamHadir']) && $data['jamHadir'] !== '-') ? $data['jamHadir'] : null,
-            (!empty($data['jamIzin']) && $data['jamIzin'] !== '-') ? $data['jamIzin'] : null,
-            (!empty($data['jamSakit']) && $data['jamSakit'] !== '-') ? $data['jamSakit'] : null,
+            $cleanTime($data['jamMasuk'] ?? null),
+            $cleanTime($data['jamPulang'] ?? null),
+            $cleanTime($data['jamHadir'] ?? null),
+            $cleanTime($data['jamIzin'] ?? null),
+            $cleanTime($data['jamSakit'] ?? null),
             $data['keterangan'] ?? '',
             $data['latitude'] ?? null,
             $data['longitude'] ?? null
@@ -180,13 +187,20 @@ if ($method === 'PUT') {
             WHERE id = ?
         ");
         
+        // Helper untuk membersihkan format jam agar tidak error SQL ''
+        $cleanTime = function($val) {
+            if (is_null($val)) return null;
+            $v = trim($val);
+            return ($v === '' || $v === '-' || $v === '00:00:00' || $v === '00:00') ? null : $v;
+        };
+
         $stmt->execute([
             $data['status'],
-            (!empty($data['jamMasuk']) && $data['jamMasuk'] !== '-') ? $data['jamMasuk'] : null,
-            (!empty($data['jamPulang']) && $data['jamPulang'] !== '-') ? $data['jamPulang'] : null,
-            (!empty($data['jamHadir']) && $data['jamHadir'] !== '-') ? $data['jamHadir'] : null,
-            (!empty($data['jamIzin']) && $data['jamIzin'] !== '-') ? $data['jamIzin'] : null,
-            (!empty($data['jamSakit']) && $data['jamSakit'] !== '-') ? $data['jamSakit'] : null,
+            $cleanTime($data['jamMasuk'] ?? null),
+            $cleanTime($data['jamPulang'] ?? null),
+            $cleanTime($data['jamHadir'] ?? null),
+            $cleanTime($data['jamIzin'] ?? null),
+            $cleanTime($data['jamSakit'] ?? null),
             $data['keterangan'] ?? '',
             $data['latitude'] ?? null,
             $data['longitude'] ?? null,
