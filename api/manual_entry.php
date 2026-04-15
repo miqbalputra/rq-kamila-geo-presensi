@@ -55,9 +55,9 @@ if ($method === 'POST') {
             sendResponse(false, 'Guru sudah memiliki presensi untuk tanggal tersebut. Hapus dulu jika ingin mengganti.');
         }
 
-        // Set waktu
-        $jamMasuk = $data['jam_masuk'] ?? date('H:i:s');
-        $jamPulang = $data['jam_pulang'] ?? null;
+        // Set waktu - Pastikan jika kosong jadi NULL agar tidak error MySQL
+        $jamMasuk = (!empty($data['jam_masuk']) && $data['jam_masuk'] !== '-') ? $data['jam_masuk'] : date('H:i:s');
+        $jamPulang = (!empty($data['jam_pulang']) && $data['jam_pulang'] !== '-') ? $data['jam_pulang'] : null;
 
         // Keterangan sudah mencakup reason, tidak perlu kolom manual_reason terpisah
         $keterangan = "Manual Entry oleh " . ($_SESSION['username'] ?? 'admin') . ": " . $data['reason'];
