@@ -10,6 +10,45 @@
   </head>
   <body>
     <div id="root"></div>
+    
+    <!-- Fail-safe untuk menangani white screen jika bundle gagal dimuat -->
+    <script>
+      window.addEventListener('error', function(e) {
+        // Deteksi kegagalan memuat chunk (umum pada PWA saat update)
+        if (e.message && (e.message.indexOf('ChunkLoadError') > -1 || e.message.indexOf('Loading chunk') > -1)) {
+          console.warn('Terdeteksi kegagalan memuat modul, mencoba memuat ulang...');
+          window.location.reload();
+        }
+      }, true);
+
+      // Jika dalam 8 detik #root masih kosong, kemungkinan terjadi error fatal
+      setTimeout(function() {
+        const root = document.getElementById('root');
+        if (root && root.innerHTML === '') {
+          root.innerHTML = '<div style="display:flex;flex-direction:column;align-items:center;justify-content:center;height:100vh;font-family:sans-serif;padding:20px;text-align:center;">' +
+                           '<h2>Aplikasi Gagal Dimuat</h2>' +
+                           '<p>Terjadi kendala saat memuat aplikasi. Silakan klik tombol di bawah untuk membersihkan cache dan mencoba lagi.</p>' +
+                           '<button onclick="clearCacheAndReload()" style="padding:12px 24px;background:#1e3a8a;color:white;border:none;border-radius:8px;font-weight:bold;cursor:pointer;margin-top:16px;">Refresh Aplikasi</button>' +
+                           '</div>';
+        }
+      }, 8000);
+
+      function clearCacheAndReload() {
+        if ('serviceWorker' in navigator) {
+          navigator.serviceWorker.getRegistrations().then(function(registrations) {
+            for(let registration of registrations) {
+              registration.unregister();
+            }
+          });
+        }
+        caches.keys().then(function(names) {
+          for (let name of names) caches.delete(name);
+        });
+        window.location.reload(true);
+      }
+    </script>
+
     <script type="module" src="/src/main.jsx"></script>
   </body>
+
 </html>
