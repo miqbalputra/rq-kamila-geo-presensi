@@ -13,27 +13,38 @@
     
     <!-- Fail-safe untuk menangani white screen jika bundle gagal dimuat -->
     <script>
+      // 1. Tangani error loading chunk (umum pada update PWA)
       window.addEventListener('error', function(e) {
-        // Deteksi kegagalan memuat chunk (umum pada PWA saat update)
         if (e.message && (e.message.indexOf('ChunkLoadError') > -1 || e.message.indexOf('Loading chunk') > -1)) {
-          console.warn('Terdeteksi kegagalan memuat modul, mencoba memuat ulang...');
+          console.warn('Gagal memuat modul, mencoba memuat ulang halaman...');
           window.location.reload();
         }
       }, true);
 
-      // Jika dalam 8 detik #root masih kosong, kemungkinan terjadi error fatal
+      // 2. Jika dalam 10 detik aplikasi masih kosong (White Screen)
       setTimeout(function() {
         const root = document.getElementById('root');
-        if (root && root.innerHTML === '') {
+        // Jika root kosong ATAU hanya berisi loading/komponen error yang belum rendering
+        if (root && (root.innerHTML === '' || root.innerHTML.length < 50)) {
+          console.error('Aplikasi gagal dimuat dalam 10 detik. Mengalihkan ke login...');
+          
+          // Beri pesan ke user sebentar sebelum redirect
           root.innerHTML = '<div style="display:flex;flex-direction:column;align-items:center;justify-content:center;height:100vh;font-family:sans-serif;padding:20px;text-align:center;">' +
-                           '<h2>Aplikasi Gagal Dimuat</h2>' +
-                           '<p>Terjadi kendala saat memuat aplikasi. Silakan klik tombol di bawah untuk membersihkan cache dan mencoba lagi.</p>' +
-                           '<button onclick="clearCacheAndReload()" style="padding:12px 24px;background:#1e3a8a;color:white;border:none;border-radius:8px;font-weight:bold;cursor:pointer;margin-top:16px;">Refresh Aplikasi</button>' +
+                           '<div style="width:40px;height:40px;border:4px solid #f3f3f3;border-top:4px solid #1e3a8a;border-radius:50%;animation:spin 1s linear infinite;"></div>' +
+                           '<h2 style="margin-top:20px;color:#1e3a8a;">Menyiapkan Aplikasi...</h2>' +
+                           '<p style="color:#666;">Sedang membersihkan cache lama agar aplikasi lancar.</p>' +
+                           '<style>@keyframes spin { 0% { transform: rotate(0deg); } 100% { transform: rotate(360deg); } }</style>' +
                            '</div>';
-        }
-      }, 8000);
 
-      function clearCacheAndReload() {
+          // Tunggu 2 detik agar user sempat baca, baru bersihkan & redirect
+          setTimeout(function() {
+            clearEverythingAndGoToLogin();
+          }, 2000);
+        }
+      }, 10000);
+
+      function clearEverythingAndGoToLogin() {
+        // Hapus Service Worker
         if ('serviceWorker' in navigator) {
           navigator.serviceWorker.getRegistrations().then(function(registrations) {
             for(let registration of registrations) {
@@ -41,12 +52,20 @@
             }
           });
         }
-        caches.keys().then(function(names) {
-          for (let name of names) caches.delete(name);
-        });
-        window.location.reload(true);
+        // Hapus Cache storage
+        if ('caches' in window) {
+          caches.keys().then(function(names) {
+            for (let name of names) caches.delete(name);
+          });
+        }
+        // Hapus LocalStorage (Opsional, tapi aman untuk reset state login yang korup)
+        // localStorage.clear(); // Hapus baris ini jika tidak ingin user logout paksa
+        
+        // Paksa ke halaman login dengan bypass cache
+        window.location.href = '/login?reload=' + Date.now();
       }
     </script>
+
 
     <script type="module" src="/src/main.jsx"></script>
   </body>
