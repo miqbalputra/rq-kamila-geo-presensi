@@ -1,0 +1,209 @@
+{
+  "name": "Reminder Presensi Guru per Shift (Instan)",
+  "nodes": [
+    {
+      "parameters": {
+        "rule": {
+          "interval": [
+            {
+              "field": "cronExpression",
+              "expression": "30 8 * * 1-5",
+              "comment": "08:30 WIB (Senin-Jumat)"
+            },
+            {
+              "field": "cronExpression",
+              "expression": "45 13 * * 1-5",
+              "comment": "13:45 WIB (Senin-Jumat)"
+            },
+            {
+              "field": "cronExpression",
+              "expression": "0 15 * * 1-5",
+              "comment": "15:00 WIB (Senin-Jumat)"
+            },
+            {
+              "field": "cronExpression",
+              "expression": "30 16 * * 1-5",
+              "comment": "16:30 WIB (Senin-Jumat)"
+            }
+          ]
+        }
+      },
+      "id": "schedule-trigger",
+      "name": "Schedule Trigger",
+      "type": "n8n-nodes-base.scheduleTrigger",
+      "typeVersion": 1,
+      "position": [100, 300]
+    },
+    {
+      "parameters": {
+        "functionCode": "// Tentukan shift berdasarkan jam saat ini\nconst now = new Date();\nconst hour = now.getHours();\nconst minute = now.getMinutes();\n\nlet shift = 1;\nlet reminderName = 'Shift 1 (Pagi)';\n\n// 08:30 -> Shift 1\n// 13:45, 15:00, 16:30 -> Shift 2\nif (hour >= 12) {\n  shift = 2;\n  reminderName = 'Shift 2 (Sore/Malam)';\n}\n\nreturn {\n  json: {\n    shift: shift,\n    reminderName: reminderName,\n    timestamp: now.toISOString(),\n    apiKey: 'n8n_geopresensi_2024_secret_key'\n  }\n};"
+      },
+      "id": "determine-shift",
+
+      "name": "Determine Shift",
+      "type": "n8n-nodes-base.function",
+      "typeVersion": 1,
+      "position": [300, 300]
+    },
+    {
+      "parameters": {
+        "url": "https://geo.rq.kelolasekolah.web.id/api/n8n_reminder_shifts.php",
+        "method": "GET",
+        "headerParameters": {
+          "parameters": [
+            {
+              "name": "X-API-KEY",
+              "value": "={{ $json.apiKey }}"
+            }
+          ]
+        },
+        "queryParameters": {
+          "parameters": [
+            {
+              "name": "shift",
+              "value": "={{ $json.shift }}"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "id": "fetch-missing-guru",
+      "name": "Fetch Missing Guru",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 3,
+      "position": [500, 300]
+    },
+    {
+      "parameters": {
+        "batchSize": 1,
+        "options": {}
+      },
+      "id": "loop-guru",
+      "name": "Loop Guru",
+      "type": "n8n-nodes-base.splitInBatches",
+      "typeVersion": 1,
+      "position": [700, 300]
+    },
+    {
+      "parameters": {
+        "functionCode": "const guru = $input.item.json;\nconst shiftData = $node[\"Determine Shift\"].json;\nconst shift = shiftData.shift;\n\nlet message = '';\nif (shift === 1) {\n  message = `🔔 *PENGINGAT PRESENSI SHIFT 1*\\n\\nHalo *${guru.nama}*,\\n\\nAnda belum melakukan presensi untuk *Shift 1* hari ini.\\nMohon segera lakukan presensi melalui aplikasi/website.\\n\\nTerima kasih.\\n_Sistem Otomatis RQ Kamila_`;\n} else {\n  message = `🔔 *PENGINGAT PRESENSI SHIFT 2*\\n\\nHalo *${guru.nama}*,\\n\\nAnda belum melakukan presensi untuk *Shift 2* hari ini.\\nMohon segera lakukan presensi melalui aplikasi/website.\\n\\nTerima kasih.\\n_Sistem Otomatis RQ Kamila_`;\n}\n\n// Resolve no HP\nlet phone = guru.no_hp || '';\nif (phone.startsWith('0')) {\n  phone = '62' + phone.substring(1);\n}\n\nreturn {\n  json: {\n    phone: phone,\n    message: message,\n    nama: guru.nama\n  }\n};"
+      },
+      "id": "format-wa-message",
+      "name": "Format WA Message",
+      "type": "n8n-nodes-base.function",
+      "typeVersion": 1,
+      "position": [900, 300]
+    },
+    {
+      "parameters": {
+        "method": "POST",
+        "url": "https://api.gowa.id/send",
+        "sendBody": true,
+        "bodyParameters": {
+          "parameters": [
+            {
+              "name": "target",
+              "value": "={{ $json.phone }}"
+            },
+            {
+              "name": "message",
+              "value": "={{ $json.message }}"
+            }
+          ]
+        },
+        "headerParameters": {
+          "parameters": [
+            {
+              "name": "Authorization",
+              "value": "Bearer YOUR_API_KEY"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "id": "send-whatsapp",
+      "name": "Send WhatsApp",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 3,
+      "position": [1100, 300]
+    }
+  ],
+  "connections": {
+    "Schedule Trigger": {
+      "main": [
+        [
+          {
+            "node": "Determine Shift",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Determine Shift": {
+      "main": [
+        [
+          {
+            "node": "Fetch Missing Guru",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Fetch Missing Guru": {
+      "main": [
+        [
+          {
+            "node": "Loop Guru",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Loop Guru": {
+      "main": [
+        [
+          {
+            "node": "Format WA Message",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Format WA Message": {
+      "main": [
+        [
+          {
+            "node": "Send WhatsApp",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Send WhatsApp": {
+      "main": [
+        [
+          {
+            "node": "Loop Guru",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "active": true,
+  "settings": {
+    "executionOrder": "v1"
+  },
+  "versionId": "1",
+  "id": "shift-reminder-kamila",
+  "meta": {
+    "instanceId": "kamila-rq"
+  },
+  "tags": []
+}

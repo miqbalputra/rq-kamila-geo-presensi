@@ -86,6 +86,7 @@ DEPLOY_GEOPRESENSI/
 !package.json
 !package-lock.json
 !n8n_workflow_reminder_presensi.json
+!n8n_workflow_reminder_presensi_v2.json
 !src/**/*
 !public/**/*
 !*.agent/*.json
