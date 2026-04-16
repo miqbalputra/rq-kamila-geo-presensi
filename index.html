@@ -11,9 +11,20 @@
   <body>
     <div id="root"></div>
     
-    <!-- Fail-safe untuk menangani white screen jika bundle gagal dimuat -->
+    <!-- Fail-safe untuk menangani white screen secara instan -->
     <script>
-      // 1. Tangani error loading chunk (umum pada update PWA)
+      // 1. Tangani error fatal secara INSTAN saat pemuatan bundle
+      window.onerror = function(msg, url, lineNo, columnNo, error) {
+        // Jika error terjadi sebelum root terisi, kemungkinan besar fatal boot error
+        const root = document.getElementById('root');
+        if (root && (root.innerHTML === '' || root.innerHTML.length < 50)) {
+          console.error('Fatal boot error terdeteksi. Mengalihkan ke login...');
+          clearEverythingAndGoToLogin();
+        }
+        return false;
+      };
+
+      // 2. Tangani error loading chunk (umum pada update PWA)
       window.addEventListener('error', function(e) {
         if (e.message && (e.message.indexOf('ChunkLoadError') > -1 || e.message.indexOf('Loading chunk') > -1)) {
           console.warn('Gagal memuat modul, mencoba memuat ulang halaman...');
@@ -21,50 +32,32 @@
         }
       }, true);
 
-      // 2. Jika dalam 10 detik aplikasi masih kosong (White Screen)
+      // 3. Fail-safe waktu (dikurangi ke 5 detik agar lebih responsif)
       setTimeout(function() {
         const root = document.getElementById('root');
-        // Jika root kosong ATAU hanya berisi loading/komponen error yang belum rendering
         if (root && (root.innerHTML === '' || root.innerHTML.length < 50)) {
-          console.error('Aplikasi gagal dimuat dalam 10 detik. Mengalihkan ke login...');
-          
-          // Beri pesan ke user sebentar sebelum redirect
-          root.innerHTML = '<div style="display:flex;flex-direction:column;align-items:center;justify-content:center;height:100vh;font-family:sans-serif;padding:20px;text-align:center;">' +
-                           '<div style="width:40px;height:40px;border:4px solid #f3f3f3;border-top:4px solid #1e3a8a;border-radius:50%;animation:spin 1s linear infinite;"></div>' +
-                           '<h2 style="margin-top:20px;color:#1e3a8a;">Menyiapkan Aplikasi...</h2>' +
-                           '<p style="color:#666;">Sedang membersihkan cache lama agar aplikasi lancar.</p>' +
-                           '<style>@keyframes spin { 0% { transform: rotate(0deg); } 100% { transform: rotate(360deg); } }</style>' +
-                           '</div>';
-
-          // Tunggu 2 detik agar user sempat baca, baru bersihkan & redirect
-          setTimeout(function() {
-            clearEverythingAndGoToLogin();
-          }, 2000);
+          console.error('Aplikasi gagal dimuat dalam 5 detik. Mengalihkan ke login...');
+          clearEverythingAndGoToLogin();
         }
-      }, 10000);
+      }, 5000);
 
       function clearEverythingAndGoToLogin() {
-        // Hapus Service Worker
+        // Hapus Service Worker & Cache untuk reset state
         if ('serviceWorker' in navigator) {
           navigator.serviceWorker.getRegistrations().then(function(registrations) {
-            for(let registration of registrations) {
-              registration.unregister();
-            }
+            for(let registration of registrations) registration.unregister();
           });
         }
-        // Hapus Cache storage
         if ('caches' in window) {
           caches.keys().then(function(names) {
             for (let name of names) caches.delete(name);
           });
         }
-        // Hapus LocalStorage (Opsional, tapi aman untuk reset state login yang korup)
-        // localStorage.clear(); // Hapus baris ini jika tidak ingin user logout paksa
-        
-        // Paksa ke halaman login dengan bypass cache
-        window.location.href = '/login?reload=' + Date.now();
+        // Redirect ke login dengan bypass cache
+        window.location.href = '/login?ref=ws_fix&t=' + Date.now();
       }
     </script>
+
 
 
     <script type="module" src="/src/main.jsx"></script>
