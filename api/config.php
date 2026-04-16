@@ -85,4 +85,15 @@ function getRequestData()
     $data = json_decode(file_get_contents('php://input'), true);
     return $data;
 }
+
+function logActivity($user, $aktivitas, $status)
+{
+    global $pdo;
+    try {
+        $stmt = $pdo->prepare("INSERT INTO activity_logs (user, aktivitas, status) VALUES (?, ?, ?)");
+        $stmt->execute([$user, $aktivitas, $status]);
+    } catch (Exception $e) {
+        // Ignore errors
+    }
+}
 ?>
