@@ -49,6 +49,7 @@
       "parameters": {
         "url": "https://geo.rq.kelolasekolah.web.id/api/n8n_reminder_shifts.php",
         "method": "GET",
+        "sendHeaders": true,
         "headerParameters": {
           "parameters": [
             {
@@ -57,6 +58,7 @@
             }
           ]
         },
+        "sendQueryParameters": true,
         "queryParameters": {
           "parameters": [
             {
@@ -67,6 +69,7 @@
         },
         "options": {}
       },
+
       "id": "fetch-missing-guru",
       "name": "Fetch Missing Guru",
       "type": "n8n-nodes-base.httpRequest",
