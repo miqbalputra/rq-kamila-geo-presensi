@@ -1,5 +1,5 @@
 {
-  "name": "Reminder Presensi Guru per Shift (Instan)",
+  "name": "Reminder Presensi Guru per Shift (Instan) v3",
   "nodes": [
     {
       "parameters": {
@@ -39,7 +39,6 @@
         "functionCode": "// Tentukan shift berdasarkan jam saat ini\nconst now = new Date();\nconst hour = now.getHours();\nconst minute = now.getMinutes();\n\nlet shift = 1;\nlet reminderName = 'Shift 1 (Pagi)';\n\n// 08:30 -> Shift 1\n// 13:45, 15:00, 16:30 -> Shift 2\nif (hour >= 12) {\n  shift = 2;\n  reminderName = 'Shift 2 (Sore/Malam)';\n}\n\nreturn {\n  json: {\n    shift: shift,\n    reminderName: reminderName,\n    timestamp: now.toISOString(),\n    apiKey: 'n8n_geopresensi_2024_secret_key'\n  }\n};"
       },
       "id": "determine-shift",
-
       "name": "Determine Shift",
       "type": "n8n-nodes-base.function",
       "typeVersion": 1,
@@ -69,7 +68,6 @@
         },
         "options": {}
       },
-
       "id": "fetch-missing-guru",
       "name": "Fetch Missing Guru",
       "type": "n8n-nodes-base.httpRequest",
@@ -78,12 +76,12 @@
     },
     {
       "parameters": {
-        "batchSize": 1,
+        "fieldToSplitOut": "data",
         "options": {}
       },
-      "id": "loop-guru",
-      "name": "Loop Guru",
-      "type": "n8n-nodes-base.splitInBatches",
+      "id": "split-data-guru",
+      "name": "Split Out",
+      "type": "n8n-nodes-base.splitOut",
       "typeVersion": 1,
       "position": [700, 300]
     },
@@ -158,14 +156,14 @@
       "main": [
         [
           {
-            "node": "Loop Guru",
+            "node": "Split Out",
             "type": "main",
             "index": 0
           }
         ]
       ]
     },
-    "Loop Guru": {
+    "Split Out": {
       "main": [
         [
           {
@@ -181,17 +179,6 @@
         [
           {
             "node": "Send WhatsApp",
-            "type": "main",
-            "index": 0
-          }
-        ]
-      ]
-    },
-    "Send WhatsApp": {
-      "main": [
-        [
-          {
-            "node": "Loop Guru",
             "type": "main",
             "index": 0
           }
