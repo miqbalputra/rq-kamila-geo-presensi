@@ -32,14 +32,15 @@
         }
       }, true);
 
-      // 3. Fail-safe waktu (dikurangi ke 5 detik agar lebih responsif)
+      // 3. Fail-safe waktu (dikurangi ke 3 detik agar sangat responsif)
       setTimeout(function() {
         const root = document.getElementById('root');
         if (root && (root.innerHTML === '' || root.innerHTML.length < 50)) {
-          console.error('Aplikasi gagal dimuat dalam 5 detik. Mengalihkan ke login...');
+          console.error('Aplikasi gagal dimuat dalam 3 detik. Mengalihkan ke login...');
           clearEverythingAndGoToLogin();
         }
-      }, 5000);
+      }, 3000);
+
 
       function clearEverythingAndGoToLogin() {
         // Hapus Service Worker & Cache untuk reset state
