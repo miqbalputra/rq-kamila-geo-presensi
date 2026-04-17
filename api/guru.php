@@ -123,10 +123,10 @@ if ($method === 'POST') {
             $tipeGuru,
             $data['activeDays'] ?? '1,2,3,4,5',
             $data['activeDays2'] ?? '',
-            $data['workStartTime'] ?? '07:30:00',
-            $data['workEndTime'] ?? '15:00:00',
-            (!empty($data['workStartTime2'])) ? $data['workStartTime2'] : null,
-            (!empty($data['workEndTime2'])) ? $data['workEndTime2'] : null
+            !empty($data['workStartTime']) ? $data['workStartTime'] : '07:30:00',
+            !empty($data['workEndTime']) ? $data['workEndTime'] : '15:00:00',
+            !empty($data['workStartTime2']) ? $data['workStartTime2'] : null,
+            !empty($data['workEndTime2']) ? $data['workEndTime2'] : null
         ]);
         
         sendResponse(true, 'Guru berhasil ditambahkan', ['id' => $pdo->lastInsertId()]);
@@ -194,10 +194,10 @@ if ($method === 'PUT') {
                 $tipeGuru,
                 $data['activeDays'] ?? '1,2,3,4,5',
                 $data['activeDays2'] ?? '',
-                $data['workStartTime'] ?? '07:30:00',
-                $data['workEndTime'] ?? '15:00:00',
-                (!empty($data['workStartTime2'])) ? $data['workStartTime2'] : null,
-                (!empty($data['workEndTime2'])) ? $data['workEndTime2'] : null,
+                !empty($data['workStartTime']) ? $data['workStartTime'] : '07:30:00',
+                !empty($data['workEndTime']) ? $data['workEndTime'] : '15:00:00',
+                !empty($data['workStartTime2']) ? $data['workStartTime2'] : null,
+                !empty($data['workEndTime2']) ? $data['workEndTime2'] : null,
                 $data['id']
             ]);
         } else {
@@ -225,10 +225,10 @@ if ($method === 'PUT') {
                 $tipeGuru,
                 $data['activeDays'] ?? '1,2,3,4,5',
                 $data['activeDays2'] ?? '',
-                $data['workStartTime'] ?? '07:30:00',
-                $data['workEndTime'] ?? '15:00:00',
-                (!empty($data['workStartTime2'])) ? $data['workStartTime2'] : null,
-                (!empty($data['workEndTime2'])) ? $data['workEndTime2'] : null,
+                !empty($data['workStartTime']) ? $data['workStartTime'] : '07:30:00',
+                !empty($data['workEndTime']) ? $data['workEndTime'] : '15:00:00',
+                !empty($data['workStartTime2']) ? $data['workStartTime2'] : null,
+                !empty($data['workEndTime2']) ? $data['workEndTime2'] : null,
                 $data['id']
             ]);
         }

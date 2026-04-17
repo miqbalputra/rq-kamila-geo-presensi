@@ -71,34 +71,40 @@ function GuruModal({ guru, onClose, onSave }) {
   }
 
   const addJabatan = () => {
-    setFormData({ ...formData, jabatan: [...formData.jabatan, ''] })
+    setFormData(prev => ({ ...prev, jabatan: [...prev.jabatan, ''] }))
   }
 
   const removeJabatan = (index) => {
-    const newJabatan = formData.jabatan.filter((_, i) => i !== index)
-    setFormData({ ...formData, jabatan: newJabatan.length > 0 ? newJabatan : [''] })
+    setFormData(prev => {
+      const newJabatan = prev.jabatan.filter((_, i) => i !== index)
+      return { ...prev, jabatan: newJabatan.length > 0 ? newJabatan : [''] }
+    })
   }
 
   const toggleDay = (day) => {
-    const days = formData.activeDays.split(',').filter(d => d !== '')
-    const index = days.indexOf(day.toString())
-    if (index === -1) {
-      days.push(day.toString())
-    } else {
-      days.splice(index, 1)
-    }
-    setFormData({ ...formData, activeDays: days.sort().join(',') })
+    setFormData(prev => {
+      const days = prev.activeDays.split(',').filter(d => d !== '')
+      const index = days.indexOf(day.toString())
+      if (index === -1) {
+        days.push(day.toString())
+      } else {
+        days.splice(index, 1)
+      }
+      return { ...prev, activeDays: days.sort().join(',') }
+    })
   }
 
   const toggleDay2 = (day) => {
-    const days = formData.activeDays2.split(',').filter(d => d !== '')
-    const index = days.indexOf(day.toString())
-    if (index === -1) {
-      days.push(day.toString())
-    } else {
-      days.splice(index, 1)
-    }
-    setFormData({ ...formData, activeDays2: days.sort().join(',') })
+    setFormData(prev => {
+      const days = prev.activeDays2.split(',').filter(d => d !== '')
+      const index = days.indexOf(day.toString())
+      if (index === -1) {
+        days.push(day.toString())
+      } else {
+        days.splice(index, 1)
+      }
+      return { ...prev, activeDays2: days.sort().join(',') }
+    })
   }
 
   const daysLabels = {
@@ -106,15 +112,22 @@ function GuruModal({ guru, onClose, onSave }) {
   }
 
   const updateJabatan = (index, value) => {
-    const newJabatan = [...formData.jabatan]
-    newJabatan[index] = value
-    setFormData({ ...formData, jabatan: newJabatan })
+    setFormData(prev => {
+      const newJabatan = [...prev.jabatan]
+      newJabatan[index] = value
+      return { ...prev, jabatan: newJabatan }
+    })
+  }
+
+  const handleInputChange = (e) => {
+    const { name, value } = e.target
+    setFormData(prev => ({ ...prev, [name]: value }))
   }
 
   return (
     <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center p-4 z-50">
-      <div className="bg-white rounded-lg max-w-md w-full max-h-[90vh] overflow-y-auto">
-        <div className="p-6 border-b border-gray-200 flex justify-between items-center">
+      <div className="bg-white rounded-lg max-w-md w-full max-h-[90vh] overflow-y-auto shadow-2xl">
+        <div className="p-6 border-b border-gray-200 flex justify-between items-center sticky top-0 bg-white z-10">
           <h2 className="text-xl font-bold text-gray-800">
             {guru ? 'Edit Guru' : 'Tambah Guru Baru'}
           </h2>
@@ -130,8 +143,9 @@ function GuruModal({ guru, onClose, onSave }) {
             </label>
             <input
               type="text"
+              name="idGuru"
               value={formData.idGuru}
-              onChange={(e) => setFormData({ ...formData, idGuru: e.target.value })}
+              onChange={handleInputChange}
               className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500"
               placeholder="Contoh: G2020001"
               required
@@ -142,8 +156,9 @@ function GuruModal({ guru, onClose, onSave }) {
             <label className="block text-sm font-medium text-gray-700 mb-2">Nama Lengkap</label>
             <input
               type="text"
+              name="nama"
               value={formData.nama}
-              onChange={(e) => setFormData({ ...formData, nama: e.target.value })}
+              onChange={handleInputChange}
               className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500"
               required
             />
@@ -153,8 +168,9 @@ function GuruModal({ guru, onClose, onSave }) {
             <label className="block text-sm font-medium text-gray-700 mb-2">Tanggal Lahir</label>
             <input
               type="date"
+              name="tanggalLahir"
               value={formData.tanggalLahir}
-              onChange={(e) => setFormData({ ...formData, tanggalLahir: e.target.value })}
+              onChange={handleInputChange}
               className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500"
               required
             />
@@ -163,8 +179,9 @@ function GuruModal({ guru, onClose, onSave }) {
           <div>
             <label className="block text-sm font-medium text-gray-700 mb-2">Jenis Kelamin</label>
             <select
+              name="jenisKelamin"
               value={formData.jenisKelamin}
-              onChange={(e) => setFormData({ ...formData, jenisKelamin: e.target.value })}
+              onChange={handleInputChange}
               className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500"
             >
               <option value="Laki-laki">Laki-laki</option>
@@ -175,8 +192,9 @@ function GuruModal({ guru, onClose, onSave }) {
           <div>
             <label className="block text-sm font-medium text-gray-700 mb-2">Tipe Guru</label>
             <select
+              name="tipeGuru"
               value={formData.tipeGuru}
-              onChange={(e) => setFormData({ ...formData, tipeGuru: e.target.value })}
+              onChange={handleInputChange}
               className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500"
             >
               <option value="full_time">Full Time (Hadir setiap hari kerja)</option>
@@ -192,8 +210,9 @@ function GuruModal({ guru, onClose, onSave }) {
           <div>
             <label className="block text-sm font-medium text-gray-700 mb-2">Alamat</label>
             <textarea
+              name="alamat"
               value={formData.alamat}
-              onChange={(e) => setFormData({ ...formData, alamat: e.target.value })}
+              onChange={handleInputChange}
               className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500"
               rows="3"
               required
@@ -204,8 +223,9 @@ function GuruModal({ guru, onClose, onSave }) {
             <label className="block text-sm font-medium text-gray-700 mb-2">Nomor HP</label>
             <input
               type="tel"
+              name="noHP"
               value={formData.noHP}
-              onChange={(e) => setFormData({ ...formData, noHP: e.target.value })}
+              onChange={handleInputChange}
               className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500"
               placeholder="08123456789"
               required
@@ -276,21 +296,23 @@ function GuruModal({ guru, onClose, onSave }) {
 
             <div className="grid grid-cols-2 gap-4">
               <div>
-                <label className="block text-xs font-semibold text-blue-700 mb-1">Jam Masuk</label>
+                <label className="block text-xs font-semibold text-blue-700 mb-1">Jam Masuk (Shift 1)</label>
                 <input
                   type="time"
+                  name="workStartTime"
                   value={formData.workStartTime}
-                  onChange={(e) => setFormData({ ...formData, workStartTime: e.target.value })}
+                  onChange={handleInputChange}
                   className="w-full px-3 py-2 border border-blue-200 rounded-lg focus:ring-2 focus:ring-blue-500 text-sm"
                   required
                 />
               </div>
               <div>
-                <label className="block text-xs font-semibold text-blue-700 mb-1">Jam Pulang</label>
+                <label className="block text-xs font-semibold text-blue-700 mb-1">Jam Pulang (Shift 1)</label>
                 <input
                   type="time"
+                  name="workEndTime"
                   value={formData.workEndTime}
-                  onChange={(e) => setFormData({ ...formData, workEndTime: e.target.value })}
+                  onChange={handleInputChange}
                   className="w-full px-3 py-2 border border-blue-200 rounded-lg focus:ring-2 focus:ring-blue-500 text-sm"
                   required
                 />
@@ -325,8 +347,9 @@ function GuruModal({ guru, onClose, onSave }) {
                   <label className="block text-xs font-semibold text-blue-600 mb-1">Masuk 2</label>
                   <input
                     type="time"
+                    name="workStartTime2"
                     value={formData.workStartTime2}
-                    onChange={(e) => setFormData({ ...formData, workStartTime2: e.target.value })}
+                    onChange={handleInputChange}
                     className="w-full px-3 py-2 border border-blue-100 rounded-lg focus:ring-2 focus:ring-blue-500 text-sm bg-white"
                   />
                 </div>
@@ -334,8 +357,9 @@ function GuruModal({ guru, onClose, onSave }) {
                   <label className="block text-xs font-semibold text-blue-600 mb-1">Pulang 2</label>
                   <input
                     type="time"
+                    name="workEndTime2"
                     value={formData.workEndTime2}
-                    onChange={(e) => setFormData({ ...formData, workEndTime2: e.target.value })}
+                    onChange={handleInputChange}
                     className="w-full px-3 py-2 border border-blue-100 rounded-lg focus:ring-2 focus:ring-blue-500 text-sm bg-white"
                   />
                 </div>
@@ -348,8 +372,9 @@ function GuruModal({ guru, onClose, onSave }) {
             <label className="block text-sm font-medium text-gray-700 mb-2">Tanggal Bertugas</label>
             <input
               type="date"
+              name="tanggalBertugas"
               value={formData.tanggalBertugas}
-              onChange={(e) => setFormData({ ...formData, tanggalBertugas: e.target.value })}
+              onChange={handleInputChange}
               className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500"
               required
             />
@@ -361,8 +386,9 @@ function GuruModal({ guru, onClose, onSave }) {
             </label>
             <input
               type="text"
+              name="username"
               value={formData.username}
-              onChange={(e) => setFormData({ ...formData, username: e.target.value })}
+              onChange={handleInputChange}
               className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500"
               required
             />
@@ -374,25 +400,26 @@ function GuruModal({ guru, onClose, onSave }) {
             </label>
             <input
               type="text"
+              name="password"
               value={formData.password}
-              onChange={(e) => setFormData({ ...formData, password: e.target.value })}
+              onChange={handleInputChange}
               className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500"
               placeholder={guru ? "Kosongkan jika tidak ingin mengubah" : "Otomatis dari Tgl Lahir"}
               required={!guru}
             />
           </div>
 
-          <div className="flex gap-3 pt-4">
+          <div className="flex gap-3 pt-4 sticky bottom-0 bg-white border-t border-gray-100 pt-4 mt-2">
             <button
               type="button"
               onClick={onClose}
-              className="flex-1 px-4 py-2 border border-gray-300 text-gray-700 rounded-lg hover:bg-gray-50"
+              className="flex-1 px-4 py-2 border border-gray-300 text-gray-700 rounded-lg hover:bg-gray-50 bg-white"
             >
               Batal
             </button>
             <button
               type="submit"
-              className="flex-1 px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700"
+              className="flex-1 px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 shadow-md"
             >
               Simpan
             </button>
